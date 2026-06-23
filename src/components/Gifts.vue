@@ -34,11 +34,6 @@
 <script setup>
 const gifts = [
   {
-    title: 'Эксклюзивная гравировка',
-    desc: 'Любая надпись, дата или символ внутри кольца — навсегда с вами.',
-    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21l4-1 12-12-3-3-12 12-1 4z"/><path d="M15 6l3 3"/><path d="M14 17h7"/></svg>`
-  },
-  {
     title: 'Видеосъёмка процесса',
     desc: 'Профессиональное видео того, как рождаются ваши кольца.',
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="14" height="10" rx="1"/><path d="M16 10l6-3v10l-6-3z"/></svg>`
