@@ -1,4 +1,5 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const API_URL = API_BASE.endsWith('/api') ? API_BASE : `${API_BASE}/api`
 
 const fetchWithTimeout = (url, options, timeout = 10000) => {
   return Promise.race([
@@ -10,7 +11,7 @@ const fetchWithTimeout = (url, options, timeout = 10000) => {
 }
 
 export const submitLead = async (form) => {
-  const response = await fetchWithTimeout(`${API_URL}/api/leads`, {
+  const response = await fetchWithTimeout(`${API_URL}/leads`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
