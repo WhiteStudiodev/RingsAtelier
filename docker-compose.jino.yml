@@ -1,0 +1,63 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rings-backend
+    restart: unless-stopped
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN:-}
+      - CHAT_ID=${CHAT_ID:-}
+      - DATABASE_URL=sqlite:///./data/leads.db
+      - CORS_ORIGINS=${CORS_ORIGINS:-https://${DOMAIN:-localhost}}
+    volumes:
+      - ./backend/data:/app/data
+    networks:
+      - rings-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: rings-frontend-builder
+    volumes:
+      - frontend-dist:/app/dist-out
+    command: >
+      sh -c "rm -rf /app/dist-out/* /app/dist-out/.[!.]* 2>/dev/null || true &&
+             cp -r /app/dist/. /app/dist-out/ &&
+             echo 'Frontend static files copied'"
+    depends_on:
+      - backend
+    networks:
+      - rings-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: rings-nginx
+    restart: unless-stopped
+    ports:
+      - "443:443"
+    volumes:
+      - frontend-dist:/usr/share/nginx/html
+      - ./nginx-jino.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      frontend:
+        condition: service_completed_successfully
+      backend:
+        condition: service_healthy
+    networks:
+      - rings-network
+
+volumes:
+  frontend-dist:
+
+networks:
+  rings-network:
+    driver: bridge
