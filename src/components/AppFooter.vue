@@ -19,8 +19,9 @@
         <div class="footer-social">
           <h4 class="footer-title">Соцсети</h4>
           <div class="footer-links">
-            <a href="#">Telegram</a>
-            <a href="#">VKontakte</a>
+            <a href="https://t.me/RingsAtelier" target="_blank" rel="noopener noreferrer">Telegram</a>
+            <a href="https://max.ru/u/f9LHodD0cOI2dWqhl4pMfYTZAPNJ5ceh8BRB4mmMt-WKXBfbaTe_78Td_ME" target="_blank" rel="noopener noreferrer">Max</a>
+            <a href="https://vk.ru/rings.atelier" target="_blank" rel="noopener noreferrer">ВКонтакте</a>
           </div>
         </div>
       </div>

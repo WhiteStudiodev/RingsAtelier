@@ -1446,13 +1446,36 @@ const catalogItems = [
   flex-direction: column;
   height: 100%;
   transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+  -webkit-transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
   transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
   transition: transform 0.15s ease-out;
+  -webkit-transition: -webkit-transform 0.15s ease-out;
   will-change: transform;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 .catalog-card:not(:hover) .catalog-card-inner {
   transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  -webkit-transition: -webkit-transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Disable 3D tilt on touch devices to avoid iOS Safari rendering bugs */
+@media (hover: none) and (pointer: coarse) {
+  .catalog-card {
+    perspective: none;
+  }
+
+  .catalog-card-inner,
+  .catalog-card:hover .catalog-card-inner,
+  .catalog-card:not(:hover) .catalog-card-inner {
+    transform: none !important;
+    -webkit-transform: none !important;
+    transform-style: flat;
+    -webkit-transform-style: flat;
+    will-change: auto;
+  }
 }
 
 /* === Image area === */
@@ -1478,9 +1501,11 @@ const catalogItems = [
 }
 
 .catalog-card :deep(.catalog-img img) {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  -webkit-object-fit: cover;
   transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
 }
 

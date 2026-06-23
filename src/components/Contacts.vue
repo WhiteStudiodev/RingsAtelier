@@ -16,7 +16,7 @@
           <form @submit.prevent="handleSubmit" class="contact-form body-font">
             <div class="form-group" :class="{ 'has-error': errors.name }">
               <label for="name">Ваше имя</label>
-              <input type="text" id="name" v-model="form.name" @blur="validateField('name')" placeholder="Константин">
+              <input type="text" id="name" v-model="form.name" @blur="validateField('name')" placeholder="Имя">
               <span v-if="errors.name" class="error-text">{{ errors.name }}</span>
             </div>
 
@@ -91,7 +91,7 @@
             <div class="info-row">
               <div class="info-item">
                 <span class="info-label">Телефон</span>
-                <a href="tel:+79991234567" class="info-value">+7 (999) 123-45-67</a>
+                <a href="tel:+79990687807" class="info-value">+7 (999) 068‒78‒07</a>
               </div>
               <div class="info-item">
                 <span class="info-label">Режим работы</span>
@@ -101,20 +101,19 @@
             </div>
 
             <div class="socials">
-              <a href="#" class="social-link" aria-label="Telegram">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="22" y1="2" x2="11" y2="13"></line>
-                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              <a href="https://t.me/RingsAtelier" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Telegram">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635.099-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.019.472z"/>
                 </svg>
               </a>
-              <a href="#" class="social-link" aria-label="Messenger Max">
-                <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2C6.477 2 2 6.03 2 11c0 2.825 1.453 5.344 3.738 7.025C5.1 19.345 4.3 21 4.3 21c3.55 0 6-1.55 6-1.55A10.74 10.74 0 0 0 12 20c5.523 0 10-4.03 10-9s-4.477-9-10-9z"/>
+              <a href="https://max.ru/u/f9LHodD0cOI2dWqhl4pMfYTZAPNJ5ceh8BRB4mmMt-WKXBfbaTe_78Td_ME" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Max">
+                <svg width="22" height="22" viewBox="0 0 48 48" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15.63 40.465c8.083 7.193 27.86-1.166 27.783-15.85C43.36 14.546 35.107 4.59 24.873 4.5c-9.538-.083-19.648 5.962-20.23 17.767-.172 3.515 0 8.859 1.231 11.73 2.335 6.7.113 8.477 2.804 9.328q3.617.9 6.953-2.861z"/>
                 </svg>
               </a>
-              <a href="#" class="social-link" aria-label="VK">
-                <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M13.684 15.65c-6.19 0-9.752-4.22-9.927-11.23h3.298c.117 5.25 2.508 7.37 4.412 7.82v-7.82h3.13v4.46c1.88-.2 3.856-2.4 4.542-4.46h3.13c-.567 2.66-2.585 4.69-4.004 5.58 1.418.72 3.69 2.51 4.522 5.65h-3.41c-.636-2.22-2.39-3.88-4.437-4.11v4.11h-1.258Z"/>
+              <a href="https://vk.ru/rings.atelier" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="ВКонтакте">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15.684 0H8.316C1.592 0 0 1.592 0 8.316v7.368C0 22.408 1.592 24 8.316 24h7.368C22.41 24 24 22.408 24 15.684V8.316C24 1.592 22.41 0 15.684 0zm3.692 17.123h-1.744c-.66 0-.864-.525-2.05-1.727-1.033-1-1.49-1.135-1.744-1.135-.356 0-.458.102-.458.593v1.575c0 .424-.135.678-1.253.678-1.846 0-3.896-1.118-5.335-3.202C4.624 10.857 4 8.673 4 8.22c0-.254.102-.491.593-.491h1.744c.44 0 .61.203.78.677.863 2.49 2.303 4.675 2.896 4.675.22 0 .322-.102.322-.66V9.721c-.068-1.186-.695-1.287-.695-1.71 0-.203.17-.407.44-.407h2.744c.373 0 .508.203.508.643v3.473c0 .372.17.508.271.508.22 0 .407-.136.813-.542 1.254-1.406 2.151-3.574 2.151-3.574.119-.254.322-.491.763-.491h1.744c.525 0 .644.27.525.643-.22 1.017-2.354 4.031-2.354 4.031-.186.305-.254.44 0 .78.186.254.796.779 1.203 1.253.745.847 1.32 1.558 1.473 2.05.17.49-.085.744-.576.744z"/>
                 </svg>
               </a>
             </div>
@@ -144,7 +143,6 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
-import { submitLead } from '../services/api.js'
 
 const form = reactive({
   name: '',
@@ -251,27 +249,7 @@ const handleSubmit = async () => {
 
   if (Object.values(errors).some(e => e !== '')) return
 
-  isSubmitting.value = true
-
-  try {
-    await submitLead(form)
-
-    submitted.value = true
-    Object.keys(form).forEach(key => {
-      if (key === 'method') form[key] = 'tg'
-      else if (key === 'consent') form[key] = false
-      else form[key] = ''
-    })
-
-    setTimeout(() => {
-      submitted.value = false
-    }, 5000)
-  } catch (error) {
-    console.error('Submit error:', error)
-    showToast('Произошла ошибка, попробуйте позже')
-  } finally {
-    isSubmitting.value = false
-  }
+  showToast('Возможность оставить заявку временно недоступна, но вы можете написать нам в любом мессенджере', 'error')
 }
 </script>
 
