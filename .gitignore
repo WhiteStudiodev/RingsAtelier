@@ -35,7 +35,17 @@ dist-ssr
 
 # Docker
 backend/data/
-swag/
+
+# SWAG runtime data (certs, logs, generated configs), but keep our nginx configs
+swag/*
+!swag/nginx/
+swag/nginx/*
+!swag/nginx/site-confs/
+swag/nginx/site-confs/*
+!swag/nginx/site-confs/default.conf
+!swag/nginx/proxy-confs/
+swag/nginx/proxy-confs/*
+!swag/nginx/proxy-confs/backend.subfolder.conf
 
 # Python backend
 backend/.env

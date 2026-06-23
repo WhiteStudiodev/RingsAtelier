@@ -60,7 +60,8 @@ services:
     volumes:
       - swag-www:/config/www
       - ./swag:/config
-      - ./swag-config/nginx/proxy-confs/backend.subfolder.conf:/config/nginx/proxy-confs/backend.subfolder.conf:ro
+      - ./swag/nginx/site-confs/default.conf:/config/nginx/site-confs/default.conf:ro
+      - ./swag/nginx/proxy-confs/backend.subfolder.conf:/config/nginx/proxy-confs/backend.subfolder.conf:ro
     depends_on:
       frontend:
         condition: service_completed_successfully
