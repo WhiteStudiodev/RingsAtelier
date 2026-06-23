@@ -1,0 +1,42 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rings-backend
+    restart: unless-stopped
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN:-}
+      - CHAT_ID=${CHAT_ID:-}
+      - DATABASE_URL=sqlite:///./data/leads.db
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost,http://localhost:80,https://rings-atelier.ru}
+    volumes:
+      - ./backend/data:/app/data
+    networks:
+      - rings-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=/api
+    container_name: rings-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - rings-network
+
+networks:
+  rings-network:
+    driver: bridge
