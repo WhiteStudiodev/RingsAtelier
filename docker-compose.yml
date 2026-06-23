@@ -9,7 +9,7 @@ services:
       - BOT_TOKEN=${BOT_TOKEN:-}
       - CHAT_ID=${CHAT_ID:-}
       - DATABASE_URL=sqlite:///./data/leads.db
-      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost,http://localhost:80,https://rings-atelier.ru}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost,https://${DOMAIN:-localhost}}
     volumes:
       - ./backend/data:/app/data
     networks:
@@ -25,17 +25,52 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        - VITE_API_URL=/api
-    container_name: rings-frontend
+      target: builder
+    container_name: rings-frontend-builder
+    volumes:
+      - swag-www:/config/www
+    command: >
+      sh -c "rm -rf /config/www/* /config/www/.[!.]* 2>/dev/null || true &&
+             cp -r /app/dist/. /config/www/ &&
+             echo 'Frontend static files copied to SWAG www'"
+    depends_on:
+      - backend
+    networks:
+      - rings-network
+
+  swag:
+    image: lscr.io/linuxserver/swag:latest
+    container_name: rings-swag
     restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-Etc/UTC}
+      - URL=${DOMAIN}
+      - SUBDOMAINS=${SUBDOMAINS:-}
+      - VALIDATION=${VALIDATION:-http}
+      - EMAIL=${EMAIL:-}
+      - ONLY_SUBDOMAINS=${ONLY_SUBDOMAINS:-false}
+      - STAGING=${STAGING:-false}
     ports:
       - "80:80"
+      - "443:443"
+    volumes:
+      - swag-www:/config/www
+      - ./swag:/config
+      - ./swag-config/nginx/proxy-confs/backend.subfolder.conf:/config/nginx/proxy-confs/backend.subfolder.conf:ro
     depends_on:
+      frontend:
+        condition: service_completed_successfully
       backend:
         condition: service_healthy
     networks:
       - rings-network
+
+volumes:
+  swag-www:
 
 networks:
   rings-network:
