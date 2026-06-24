@@ -88,6 +88,21 @@
 
 <script setup>
 import { onMounted } from 'vue'
+import { useHead } from '@vueuse/head'
+
+useHead({
+  title: 'Договор публичной оферты | Rings Atelier',
+  meta: [
+    { name: 'description', content: 'Договор публичной оферты на оказание услуг Rings Atelier — ювелирных мастер-классов по созданию обручальных колец в Санкт-Петербурге.' },
+    { property: 'og:title', content: 'Договор публичной оферты | Rings Atelier' },
+    { property: 'og:description', content: 'Договор публичной оферты Rings Atelier.' },
+    { property: 'og:url', content: 'https://rings-atelier.ru/offer' },
+    { property: 'og:type', content: 'website' }
+  ],
+  link: [
+    { rel: 'canonical', href: 'https://rings-atelier.ru/offer' }
+  ]
+})
 
 onMounted(() => {
   window.scrollTo(0, 0)

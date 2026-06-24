@@ -2,9 +2,9 @@
   <section id="products">
     <div class="container">
       <div class="section-header catalog-header" data-reveal>
-        <h2 class="section-title heading-font catalog-title catalog-title-gold">Примеры изделий</h2>
+        <h2 class="section-title heading-font catalog-title catalog-title-gold">Обручальные кольца на заказ в Спб</h2>
         <div class="separator"></div>
-        <p class="catalog-lead">Все модели — это лишь примеры наших работ. Вы всегда можете изменить дизайн, форму и фактуру, добавить гравировку или воплотить вашу собственную идею в золоте.</p>
+        <p class="catalog-lead">Примеры свадебных и обручальных колец, созданных на наших мастер-классах в Санкт-Петербурге. Вы всегда можете изменить дизайн, форму и фактуру, добавить гравировку или воплотить собственную идею в золоте, серебре или платине.</p>
       </div>
 
       <div class="catalog-grid">

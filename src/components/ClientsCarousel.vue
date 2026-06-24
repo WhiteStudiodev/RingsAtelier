@@ -3,7 +3,7 @@
     <div class="container">
       <div class="section-header" data-reveal>
         <span class="section-subtitle uppercase tracking-widest">Наши гости</span>
-        <h2 class="section-title heading-font">Вдохновенные моментом</h2>
+        <h2 class="section-title heading-font">Свадебные кольца, созданные на мастер-классе</h2>
         <div class="separator"></div>
       </div>
       

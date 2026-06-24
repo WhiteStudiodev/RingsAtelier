@@ -172,6 +172,21 @@
 
 <script setup>
 import { onMounted } from 'vue'
+import { useHead } from '@vueuse/head'
+
+useHead({
+  title: 'Политика обработки персональных данных | Rings Atelier',
+  meta: [
+    { name: 'description', content: 'Политика обработки персональных данных сайта Rings Atelier — ювелирной мастерской в Санкт-Петербурге.' },
+    { property: 'og:title', content: 'Политика обработки персональных данных | Rings Atelier' },
+    { property: 'og:description', content: 'Политика обработки персональных данных Rings Atelier.' },
+    { property: 'og:url', content: 'https://rings-atelier.ru/personal-data' },
+    { property: 'og:type', content: 'website' }
+  ],
+  link: [
+    { rel: 'canonical', href: 'https://rings-atelier.ru/personal-data' }
+  ]
+})
 
 onMounted(() => {
   window.scrollTo(0, 0)

@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+Sitemap: https://rings-atelier.ru/sitemap.xml
+Host: https://rings-atelier.ru

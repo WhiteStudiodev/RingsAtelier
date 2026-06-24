@@ -3,7 +3,7 @@
     <div class="container">
       <div class="section-header" data-reveal>
         <span class="section-subtitle uppercase tracking-widest">Ждём в гости</span>
-        <h2 class="section-title heading-font">Контакты и запись</h2>
+        <h2 class="section-title heading-font">Запись на ювелирный мастер-класс в Спб</h2>
         <div class="separator"></div>
       </div>
 
@@ -16,7 +16,7 @@
           <form @submit.prevent="handleSubmit" class="contact-form body-font">
             <div class="form-group" :class="{ 'has-error': errors.name }">
               <label for="name">Ваше имя</label>
-              <input type="text" id="name" v-model="form.name" @blur="validateField('name')" placeholder="Имя">
+              <input type="text" id="name" v-model="form.name" placeholder="Имя">
               <span v-if="errors.name" class="error-text">{{ errors.name }}</span>
             </div>
 
@@ -53,7 +53,7 @@
 
             <div class="form-group" :class="{ 'has-error': errors.message }">
               <label for="message">Пара слов о вашей идее</label>
-              <textarea id="message" v-model="form.message" @blur="validateField('message')" placeholder="Хочу создать парные обручальные кольца..." rows="4"></textarea>
+              <textarea id="message" v-model="form.message" placeholder="Хочу создать парные обручальные кольца..." rows="4"></textarea>
               <span v-if="errors.message" class="error-text">{{ errors.message }}</span>
             </div>
 
@@ -146,7 +146,7 @@ import { ref, reactive } from 'vue'
 
 const form = reactive({
   name: '',
-  method: 'tg',
+  method: 'phone',
   contact: '',
   message: '',
   consent: false
@@ -156,10 +156,10 @@ const showDropdown = ref(false)
 const selectRef = ref(null)
 
 const contactMethods = [
-  { id: 'tg', label: 'Telegram', placeholder: '@username' },
-  { id: 'max', label: 'Max', placeholder: 'ID или ссылка...' },
-  { id: 'vk', label: 'ВКонтакте', placeholder: 'vk.com/id...' },
-  { id: 'phone', label: 'Номер телефона', placeholder: '+7 --- --- -- --' }
+  { id: 'phone', label: 'Номер телефона', placeholder: '+7 --- --- -- --' },
+  { id: 'tg', label: 'Telegram', placeholder: '+7 --- --- -- --' },
+  { id: 'max', label: 'Max', placeholder: '+7 --- --- -- --' },
+  { id: 'vk', label: 'ВКонтакте', placeholder: 'vk.com/id...' }
 ]
 
 const selectMethod = (id) => {
@@ -206,12 +206,9 @@ const validateField = (field) => {
       return
     }
 
-    if (form.method === 'tg') {
-      if (!val.startsWith('@') && !val.includes('t.me/')) {
-        errors.contact = 'Никнейм должен начинаться с @'
-      }
-    } else if (form.method === 'phone') {
-      const phoneRegex = /^(\+7|8)?[\s\-]?\(?\d{3}\)?[\s\-]?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}$/
+    const phoneRegex = /^(\+7|8)?[\s\-]?\(?\d{3}\)?[\s\-]?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}$/
+
+    if (form.method === 'phone' || form.method === 'tg' || form.method === 'max') {
       if (!phoneRegex.test(val)) {
         errors.contact = 'Неверный формат номера'
       }
@@ -242,9 +239,7 @@ const showToast = (message, type = 'error') => {
 }
 
 const handleSubmit = async () => {
-  validateField('name')
   validateField('contact')
-  validateField('message')
   validateField('consent')
 
   if (Object.values(errors).some(e => e !== '')) return

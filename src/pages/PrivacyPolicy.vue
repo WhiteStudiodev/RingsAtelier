@@ -78,6 +78,21 @@
 
 <script setup>
 import { onMounted } from 'vue'
+import { useHead } from '@vueuse/head'
+
+useHead({
+  title: 'Политика конфиденциальности | Rings Atelier',
+  meta: [
+    { name: 'description', content: 'Политика конфиденциальности сайта Rings Atelier — ювелирной мастерской и студии мастер-классов по созданию обручальных колец в Санкт-Петербурге.' },
+    { property: 'og:title', content: 'Политика конфиденциальности | Rings Atelier' },
+    { property: 'og:description', content: 'Политика конфиденциальности Rings Atelier.' },
+    { property: 'og:url', content: 'https://rings-atelier.ru/privacy' },
+    { property: 'og:type', content: 'website' }
+  ],
+  link: [
+    { rel: 'canonical', href: 'https://rings-atelier.ru/privacy' }
+  ]
+})
 
 onMounted(() => {
   window.scrollTo(0, 0)
