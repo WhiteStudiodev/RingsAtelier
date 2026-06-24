@@ -1,6 +1,9 @@
 <template>
   <header class="glass-panel">
-    <RouterLink to="/" class="logo heading-font uppercase">Rings Atelier</RouterLink>
+    <RouterLink to="/" class="logo logo-with-icon heading-font uppercase">
+      <img :src="logoSrc" alt="Rings Atelier" class="logo-img">
+      <span>Rings Atelier</span>
+    </RouterLink>
     <nav class="nav-links">
       <a href="#studio" @click="scrollToSection">Студия</a>
       <a href="#masterclass" @click="scrollToSection">Мастер-классы</a>
@@ -39,6 +42,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { RouterLink, useRouter, useRoute } from 'vue-router'
+import logoSrc from '/favicon.svg'
 
 const router = useRouter()
 const route = useRoute()
@@ -201,6 +205,24 @@ const scrollToSection = async (e) => {
 @media (max-width: 1080px) {
   .mobile-menu-toggle {
     display: flex;
+  }
+}
+
+.logo-with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.logo-img {
+  height: 2rem;
+  width: auto;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .logo-img {
+    height: 1.6rem;
   }
 }
 </style>

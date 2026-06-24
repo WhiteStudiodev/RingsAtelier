@@ -3,7 +3,10 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-brand">
-          <a href="#" class="logo heading-font uppercase">Rings Atelier</a>
+          <a href="#" class="logo logo-with-icon heading-font uppercase">
+            <img :src="logoSrc" alt="Rings Atelier" class="logo-img">
+            <span>Rings Atelier</span>
+          </a>
           <p class="footer-desc font-light">Rings Atelier — ювелирная мастерская в Санкт-Петербурге. Премиальные мастер-классы по созданию обручальных колец, помолвочных колец и украшений на заказ в самом сердце города.</p>
         </div>
         
@@ -52,6 +55,7 @@
 
 <script setup>
 import { RouterLink } from 'vue-router'
+import logoSrc from '/favicon.svg'
 </script>
 
 <style scoped>
@@ -180,6 +184,24 @@ import { RouterLink } from 'vue-router'
     flex-direction: column;
     gap: 1rem;
     text-align: center;
+  }
+}
+
+.logo-with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo-img {
+  height: 2.5rem;
+  width: auto;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .logo-img {
+    height: 2rem;
   }
 }
 </style>
