@@ -1,4 +1,5 @@
 import aiohttp
+from aiohttp_socks import ProxyConnector
 from sqlalchemy.orm import Session
 
 from config import settings
@@ -34,7 +35,8 @@ async def send_lead_notification(lead: Lead) -> bool:
         return False
 
     text = format_lead_message(lead)
-    url = f"https://api.telegram.org/bot{settings.bot_token}/sendMessage"
+    base_url = settings.telegram_api_url.rstrip("/")
+    url = f"{base_url}/bot{settings.bot_token}/sendMessage"
 
     payload = {
         "chat_id": settings.chat_id,
@@ -43,7 +45,11 @@ async def send_lead_notification(lead: Lead) -> bool:
     }
 
     try:
-        async with aiohttp.ClientSession() as session:
+        connector = None
+        if settings.proxy_url:
+            connector = ProxyConnector.from_url(settings.proxy_url)
+
+        async with aiohttp.ClientSession(connector=connector) as session:
             async with session.post(
                 url,
                 json=payload,

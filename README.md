@@ -32,10 +32,18 @@ BOT_TOKEN=your_telegram_bot_token
 CHAT_ID=your_telegram_chat_id
 CORS_ORIGINS=http://localhost:5173,http://localhost:4173
 DATABASE_URL=sqlite:///./leads.db
+
+# Telegram API base URL. Override to use a proxy/mirror (e.g. Cloudflare Worker).
+# TELEGRAM_API_URL=https://empty-dew-4b05.hipster-hop123.workers.dev/
+
+# Optional SOCKS5 proxy URL for the Telegram bot session
+# PROXY_URL=socks5://user:password@host:port
 ```
 
 - `BOT_TOKEN` — получи у [@BotFather](https://t.me/botfather).
 - `CHAT_ID` — свой ID можно узнать через [@userinfobot](https://t.me/userinfobot). Если бот пишет в группу, укажи ID группы (со знаком `-`).
+- `TELEGRAM_API_URL` — базовый URL API Telegram. Можно заменить на свой прокси/зеркало, например Cloudflare Worker (`https://empty-dew-4b05.hipster-hop123.workers.dev/`).
+- `PROXY_URL` — опциональный URL SOCKS5 прокси для сессии бота (например, `socks5://user:password@host:port`). Если не задан, запросы идут напрямую.
 
 Запуск backend:
 
