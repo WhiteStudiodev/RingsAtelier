@@ -1,5 +1,6 @@
 import aiohttp
 from aiohttp_socks import ProxyConnector
+from loguru import logger
 from sqlalchemy.orm import Session
 
 from config import settings
@@ -32,6 +33,7 @@ def format_lead_message(lead: Lead) -> str:
 
 async def send_lead_notification(lead: Lead) -> bool:
     if not settings.bot_token or not settings.chat_id:
+        logger.warning("Telegram bot_token or chat_id is not configured")
         return False
 
     text = format_lead_message(lead)
@@ -44,19 +46,26 @@ async def send_lead_notification(lead: Lead) -> bool:
         "parse_mode": "HTML",
     }
 
+    logger.debug("Sending Telegram notification to {}", base_url)
+
     try:
         connector = None
         if settings.proxy_url:
+            logger.debug("Using proxy: {}", settings.proxy_url)
             connector = ProxyConnector.from_url(settings.proxy_url)
 
         async with aiohttp.ClientSession(connector=connector) as session:
             async with session.post(
                 url,
                 json=payload,
-                timeout=aiohttp.ClientTimeout(total=10),
+                timeout=aiohttp.ClientTimeout(total=30),
             ) as response:
                 data = await response.json()
-                return data.get("ok", False)
-    except Exception as exc:
-        print(f"Telegram send error: {exc}")
+                if not data.get("ok", False):
+                    logger.error("Telegram API returned error: {}", data)
+                    return False
+                logger.info("Telegram notification sent successfully")
+                return True
+    except Exception:
+        logger.exception("Telegram send error")
         return False
