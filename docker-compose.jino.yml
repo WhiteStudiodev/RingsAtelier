@@ -10,6 +10,8 @@ services:
       - CHAT_ID=${CHAT_ID:-}
       - DATABASE_URL=sqlite:///./data/leads.db
       - CORS_ORIGINS=${CORS_ORIGINS:-https://${DOMAIN:-localhost}}
+      - TELEGRAM_API_URL=${TELEGRAM_API_URL:-https://api.telegram.org/}
+      - PROXY_URL=${PROXY_URL:-}
     volumes:
       - ./backend/data:/app/data
     networks:
