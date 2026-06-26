@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from config import settings
 from database import create_tables, get_db, Lead
 from schemas import LeadCreate, LeadOut
+from services.email import send_lead_email
 from services.telegram import send_lead_notification
 
 
@@ -50,5 +51,6 @@ async def create_lead(lead_data: LeadCreate, db: Session = Depends(get_db)):
     db.refresh(lead)
 
     await send_lead_notification(lead)
+    await send_lead_email(lead)
 
     return lead

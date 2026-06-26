@@ -18,5 +18,13 @@ class Settings(BaseSettings):
     # socks5://user:password@host:port
     proxy_url: str | None = None
 
+    # SMTP settings for email notifications (Yandex: smtp.yandex.ru:465)
+    smtp_host: str = "smtp.yandex.ru"
+    smtp_port: int = 465
+    smtp_user: str | None = None
+    smtp_password: str | None = None
+    smtp_from: str | None = None
+    smtp_to: str | None = None
+
 
 settings = Settings()
