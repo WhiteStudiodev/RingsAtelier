@@ -207,15 +207,14 @@ const validateField = (field) => {
       return
     }
 
-    const phoneRegex = /^(\+7|8)?[\s\-]?\(?\d{3}\)?[\s\-]?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}$/
-
-    if (form.method === 'phone' || form.method === 'tg' || form.method === 'max') {
-      if (!phoneRegex.test(val)) {
-        errors.contact = 'Неверный формат номера'
-      }
-    } else if (form.method === 'vk') {
+    if (form.method === 'vk') {
       if (!val.includes('vk.com/') && val.length < 3) {
         errors.contact = 'Введите ссылку или ID'
+      }
+    } else {
+      const phoneRegex = /^(\+7|8)?[\s\-]?\(?\d{3}\)?[\s\-]?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}$/
+      if (!phoneRegex.test(val)) {
+        errors.contact = 'Неверный формат номера'
       }
     }
   }
