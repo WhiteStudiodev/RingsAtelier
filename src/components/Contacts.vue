@@ -143,6 +143,7 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
+import { submitLead } from '../services/api.js'
 
 const form = reactive({
   name: '',
@@ -244,7 +245,27 @@ const handleSubmit = async () => {
 
   if (Object.values(errors).some(e => e !== '')) return
 
-  showToast('Возможность оставить заявку временно недоступна, но вы можете написать нам в любом мессенджере', 'error')
+  isSubmitting.value = true
+
+  try {
+    await submitLead(form)
+    submitted.value = true
+    showToast('Спасибо за доверие! Мы свяжемся с вами в ближайшее время.', 'success')
+
+    form.name = ''
+    form.contact = ''
+    form.message = ''
+    form.consent = false
+    form.method = 'phone'
+
+    setTimeout(() => {
+      submitted.value = false
+    }, 5000)
+  } catch (error) {
+    showToast(error.message || 'Не удалось отправить заявку. Попробуйте ещё раз.', 'error')
+  } finally {
+    isSubmitting.value = false
+  }
 }
 </script>
 
