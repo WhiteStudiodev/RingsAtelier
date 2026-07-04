@@ -1708,6 +1708,17 @@ const catalogItems = [
   .catalog-card:hover {
     transform: translateY(-4px) !important;
   }
+
+  /* Minimal card view on tablets and mobile: photo + title + price only */
+  .catalog-card :deep(.catalog-img) {
+    margin-bottom: 0.75rem;
+  }
+
+  .catalog-card :deep(.product-desc),
+  .catalog-meta,
+  .catalog-divider {
+    display: none;
+  }
 }
 
 @media (max-width: 640px) {
