@@ -1722,8 +1722,13 @@ const catalogItems = [
 }
 
 @media (max-width: 640px) {
+  .catalog-card :deep(.catalog-img) {
+    margin-bottom: 0.5rem;
+  }
+
   .catalog-card :deep(.product-title) {
-    font-size: 1.05rem;
+    font-size: 0.9rem;
+    letter-spacing: 0;
   }
 
   .catalog-card :deep(.product-desc) {
@@ -1733,7 +1738,8 @@ const catalogItems = [
   }
 
   .catalog-card :deep(.product-price) {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
+    white-space: nowrap;
   }
 
   .catalog-meta {
@@ -1747,6 +1753,16 @@ const catalogItems = [
 
   .catalog-divider {
     margin-bottom: 0.75rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .catalog-card :deep(.product-title) {
+    font-size: 0.8rem;
+  }
+
+  .catalog-card :deep(.product-price) {
+    font-size: 0.8rem;
   }
 }
 
