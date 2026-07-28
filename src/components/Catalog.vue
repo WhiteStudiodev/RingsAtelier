@@ -7,6 +7,50 @@
         <p class="catalog-lead">Примеры свадебных и обручальных колец, созданных на наших мастер-классах в Санкт-Петербурге. Вы всегда можете изменить дизайн, форму и фактуру, добавить гравировку или воплотить собственную идею в золоте, серебре или платине.</p>
       </div>
 
+      <!-- Category filters -->
+      <div class="category-filter" data-reveal>
+        <!-- Desktop: inline row -->
+        <div class="category-list">
+          <button
+            v-for="cat in categories"
+            :key="cat"
+            type="button"
+            class="category-btn"
+            :class="{ active: selectedCategory === cat }"
+            @click="selectedCategory = cat"
+          >{{ cat }}</button>
+        </div>
+
+        <!-- Mobile: burger dropdown -->
+        <div class="category-mobile">
+          <button
+            type="button"
+            class="category-burger"
+            :class="{ open: isMobileMenuOpen }"
+            aria-label="Категории"
+            @click="isMobileMenuOpen = !isMobileMenuOpen"
+          >
+            <span class="burger-line"></span>
+            <span class="burger-line"></span>
+            <span class="burger-line"></span>
+            <span class="burger-label">{{ selectedCategory }}</span>
+          </button>
+
+          <Transition name="category-menu">
+            <div v-if="isMobileMenuOpen" class="category-mobile-menu">
+              <button
+                v-for="cat in categories"
+                :key="cat"
+                type="button"
+                class="category-mobile-item"
+                :class="{ active: selectedCategory === cat }"
+                @click="selectedCategory = cat; isMobileMenuOpen = false"
+              >{{ cat }}</button>
+            </div>
+          </Transition>
+        </div>
+      </div>
+
       <div class="catalog-grid">
         <div
           v-for="(item, index) in visibleItems"
@@ -24,7 +68,7 @@
                 Выбор мастеров
               </div>
               <img
-                :src="item.image"
+                :src="item.images[0]"
                 :alt="item.title"
                 loading="lazy"
                 decoding="async"
@@ -61,7 +105,7 @@
       <div v-if="hasMore" class="show-more-wrap" data-reveal>
         <button class="show-more-btn" @click="showMore">
           <span>Показать ещё</span>
-          <span class="show-more-count">{{ catalogItems.length - visibleCount }}</span>
+          <span class="show-more-count">{{ filteredItems.length - visibleCount }}</span>
         </button>
       </div>
     </div>
@@ -83,13 +127,49 @@
                 Выбор мастеров
               </div>
               <img
-                :src="selectedProduct.image"
+                :src="selectedProduct.images[currentImage]"
                 :alt="selectedProduct.title"
                 class="modal-image"
                 decoding="async"
                 width="1480"
                 height="2048"
               >
+
+              <!-- Slider controls -->
+              <template v-if="selectedProduct.images.length > 1">
+                <button
+                  type="button"
+                  class="slider-arrow slider-arrow-prev"
+                  aria-label="Предыдущее фото"
+                  @click.stop="prevImage"
+                >
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M12 4L6 10L12 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  class="slider-arrow slider-arrow-next"
+                  aria-label="Следующее фото"
+                  @click.stop="nextImage"
+                >
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M8 4L14 10L8 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+
+                <div class="slider-dots">
+                  <button
+                    v-for="(_, idx) in selectedProduct.images"
+                    :key="idx"
+                    type="button"
+                    class="slider-dot"
+                    :class="{ active: currentImage === idx }"
+                    :aria-label="`Фото ${idx + 1}`"
+                    @click.stop="currentImage = idx"
+                  ></button>
+                </div>
+              </template>
             </div>
 
             <div class="modal-info">
@@ -189,65 +269,30 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import ring1 from '../../rings/DSC06212.webp'
-import ring2 from '../../rings/DSC06247.webp'
-import ring3 from '../../rings/DSC06251.webp'
-import ring4 from '../../rings/DSC06289.webp'
-import ring5 from '../../rings/DSC06323.webp'
-import ring6 from '../../rings/DSC06338.webp'
-import ring7 from '../../rings/DSC06365.webp'
-import ring8 from '../../rings/DSC06381.webp'
-import ring9 from '../../rings/DSC06409.webp'
-import ring10 from '../../rings/DSC06410.webp'
-import ring11 from '../../rings/DSC06441.webp'
-import ring12 from '../../rings/DSC06478.webp'
-import ring13 from '../../rings/DSC06504.webp'
-import ring14 from '../../rings/DSC06531.webp'
-import ring15 from '../../rings/DSC06538.webp'
-import ring16 from '../../rings/DSC06565.webp'
-import ring17 from '../../rings/DSC06579.webp'
-import ring18 from '../../rings/DSC06606.webp'
-import ring19 from '../../rings/DSC06624.webp'
-import ring20 from '../../rings/DSC06646.webp'
-import ring21 from '../../rings/DSC06782.webp'
-import ring22 from '../../rings/DSC06800.webp'
-import ring23 from '../../rings/DSC06803.webp'
-import ring24 from '../../rings/DSC06805.webp'
-import ring25 from '../../rings/DSC06810.webp'
-import ring26 from '../../rings/DSC06812.webp'
-import ring27 from '../../rings/DSC06815.webp'
-import ring28 from '../../rings/DSC06816.webp'
-import ring29 from '../../rings/DSC06821.webp'
-import ring30 from '../../rings/DSC06824.webp'
-import ring31 from '../../rings/DSC06825.webp'
-import ring32 from '../../rings/DSC06827.webp'
-import ring33 from '../../rings/DSC06830.webp'
-import ring34 from '../../rings/DSC06831.webp'
-import ring35 from '../../rings/DSC06834.webp'
-import ring36 from '../../rings/DSC06839.webp'
-import ring37 from '../../rings/DSC06840.webp'
-import ring38 from '../../rings/DSC06843.webp'
-import ring39 from '../../rings/DSC06849.webp'
-import ring40 from '../../rings/DSC06850.webp'
-import ring41 from '../../rings/DSC06853.webp'
-import ring42 from '../../rings/DSC06856.webp'
-import ring43 from '../../rings/DSC06858.webp'
-import ring44 from '../../rings/DSC06863.webp'
-import ring45 from '../../rings/DSC06867.webp'
-import ring46 from '../../rings/DSC06868.webp'
-import ring47 from '../../rings/DSC06870.webp'
-import ring48 from '../../rings/DSC06872.webp'
-import ring49 from '../../rings/DSC06876.webp'
-import ring50 from '../../rings/DSC06878.webp'
-import ring51 from '../../rings/DSC06879.webp'
-import ring52 from '../../rings/DSC06880.webp'
-import ring53 from '../../rings/DSC06882.webp'
 
 const router = useRouter()
 const selectedProduct = ref(null)
 const activeSpecTab = ref('female')
+const currentImage = ref(0)
+
+// === Category filters ===
+const selectedCategory = ref('Все')
+const isMobileMenuOpen = ref(false)
+const categories = [
+  'Все',
+  'Обручальные кольца',
+  'Парные обручальные кольца',
+  'Фактурные',
+  'С бриллиантами',
+  'Комбинированные',
+  'Помолвочные кольца'
+]
+
+watch(selectedCategory, () => {
+  visibleCount.value = VISIBLE_STEP
+})
 
 const openModal = (item) => {
   selectedProduct.value = item
@@ -257,7 +302,18 @@ const openModal = (item) => {
 
 const closeModal = () => {
   selectedProduct.value = null
+  currentImage.value = 0
   document.body.style.overflow = ''
+}
+
+const nextImage = () => {
+  if (!selectedProduct.value) return
+  currentImage.value = (currentImage.value + 1) % selectedProduct.value.images.length
+}
+
+const prevImage = () => {
+  if (!selectedProduct.value) return
+  currentImage.value = (currentImage.value - 1 + selectedProduct.value.images.length) % selectedProduct.value.images.length
 }
 
 const goToBooking = async () => {
@@ -277,10 +333,15 @@ const goToBooking = async () => {
 // === "Show More" pagination ===
 const VISIBLE_STEP = 8
 const visibleCount = ref(VISIBLE_STEP)
-const visibleItems = computed(() => catalogItems.slice(0, visibleCount.value))
-const hasMore = computed(() => visibleCount.value < catalogItems.length)
+const filteredItems = computed(() => {
+  const visible = catalogItems.filter(item => !item.hidden)
+  if (selectedCategory.value === 'Все') return visible
+  return visible.filter(item => item.categories.includes(selectedCategory.value))
+})
+const visibleItems = computed(() => filteredItems.value.slice(0, visibleCount.value))
+const hasMore = computed(() => visibleCount.value < filteredItems.value.length)
 const showMore = () => {
-  visibleCount.value = Math.min(visibleCount.value + VISIBLE_STEP, catalogItems.length)
+  visibleCount.value = Math.min(visibleCount.value + VISIBLE_STEP, filteredItems.value.length)
 }
 
 // === 3D Tilt on hover ===
@@ -303,15 +364,16 @@ const resetTilt = (e) => {
 const catalogItems = [
   {
     title: 'Лунные шайбы',
-    desc: 'Прямые обручальные кольца с лунной фактурой.',
-    price: 'от 89 578 ₽',
+    desc: 'оставляем то что на сайте: "Прямые обручальные кольца «шайбы» с лунной фактурой в белом золоте."',
+    price: 'от 119 000 ₽',
     material: 'Металл на выбор',
-    image: ring6,
+    images: ['/rings_new/01._Лунные_шайбы_123.webp', '/rings_new/01.2._Лунные_шайбы_123.webp', '/rings_new/01.3._Лунные_шайбы_123.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Парные обручальные кольца', 'Фактурные'],
     specs: {
-      style: 'Прямые обручальные кольца «шайбы» с лунной фактурой в белом золоте.',
-      female: { size: '16', width: '4 мм' },
-      male:   { size: '18', width: '5 мм' },
+      style: 'оставляем то что на сайте: "Прямые обручальные кольца «шайбы» с лунной фактурой в белом золоте."',
+      female: { size: '16', width: '3,5 мм' },
+      male:   { size: '19', width: '5 мм' },
       metals: [
         { label: 'Серебро 925',            color: '#C7C9CE' },
         { label: 'Белое золото 585/750',   color: '#E4E6EA' },
@@ -323,16 +385,17 @@ const catalogItems = [
     }
   },
   {
-    title: 'Полосатые шайбы',
-    desc: 'Прямые шайбы с контрастными полосками и акцентным бриллиантом.',
-    price: 'от 82 654 ₽',
+    title: 'Шайбы с Х (ИКС) прорезями',
+    desc: 'Прямые обручальные кольца «шайбы» с полосками и акцентным бриллиантом в белом золоте. *Происхождение бриллиантов на выбор',
+    price: 'от 136 800 ₽',
     material: 'Металл на выбор',
-    image: ring14,
+    images: ['/rings_new/02._Шайбы_с_Х_ИКС_прорезями_123.webp', '/rings_new/02.1._Шайбы_с_Х_ИКС_прорезями_123.webp', '/rings_new/02.2._Шайбы_с_Х_ИКС_прорезями_123.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Парные обручальные кольца', 'Фактурные'],
     specs: {
-      style: 'Прямые обручальные кольца «шайбы» с полосками и акцентным бриллиантом в белом золоте.',
-      female: { size: '16', width: '2,5 мм', diamonds: 'Круг · 0,015 ct' },
-      male:   { size: '18', width: '3 мм' },
+      style: 'Прямые обручальные кольца «шайбы» с полосками и акцентным бриллиантом в белом золоте. *Происхождение бриллиантов на выбор',
+      female: { size: '16', width: '4 мм' },
+      male:   { size: '18', width: '4,5 мм' },
       metals: [
         { label: 'Серебро 925',            color: '#C7C9CE' },
         { label: 'Белое золото 585/750',   color: '#E4E6EA' },
@@ -346,14 +409,15 @@ const catalogItems = [
   {
     title: 'Зимний лёд',
     desc: 'Прямые шайбы с фактурой зимнего льда.',
-    price: 'от 79 453 ₽',
+    price: 'от 124 500 ₽',
     material: 'Металл на выбор',
-    image: ring2,
+    images: ['/rings_new/03._Зимний_лёд_123.webp', '/rings_new/03.1._Зимний_лёд_123.webp', '/rings_new/03.2._Зимний_лёд_123.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Парные обручальные кольца', 'Фактурные'],
     specs: {
-      style: 'Прямые обручальные кольца «шайбы» с фактурой «Зимний лёд» в белом золоте.',
-      female: { size: '17', width: '3,5 мм' },
-      male:   { size: '16', width: '4 мм' },
+      style: 'Прямые шайбы с фактурой зимнего льда.',
+      female: { size: '15', width: '3,5 мм' },
+      male:   { size: '17', width: '4 мм' },
       metals: [
         { label: 'Серебро 925',            color: '#C7C9CE' },
         { label: 'Белое золото 585/750',   color: '#E4E6EA' },
@@ -366,13 +430,14 @@ const catalogItems = [
   },
   {
     title: 'Комбинированные шайбы',
-    desc: 'Шайбы с вставками из двух золотых оттенков.',
-    price: 'от 98 658 ₽',
+    desc: 'Комбинированные обручальные кольца «шайбы» со вставками бриллиантов в белом и жёлтом золоте. *Происхождение бриллиантов на выбор',
+    price: 'от 135 900 ₽',
     material: 'Металл на выбор',
-    image: ring13,
+    images: ['/rings_new/04._Комбинированные_шайбы_125.webp', '/rings_new/04.1._Комбинированные_шайбы_125.webp', '/rings_new/04.3._Комбинированные_шайбы_125.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Парные обручальные кольца', 'Комбинированные'],
     specs: {
-      style: 'Комбинированные обручальные кольца «шайбы» со вставками в белом и жёлтом золоте.',
+      style: 'Комбинированные обручальные кольца «шайбы» со вставками бриллиантов в белом и жёлтом золоте. *Происхождение бриллиантов на выбор',
       female: { size: '16', width: '3 мм', diamonds: 'Круг · 0,15 ct' },
       male:   { size: '18', width: '5 мм' },
       metals: [
@@ -388,12 +453,13 @@ const catalogItems = [
   {
     title: 'Горные шайбы',
     desc: 'Прямые шайбы с фактурой «Горы».',
-    price: 'от 85 652 ₽',
+    price: 'от 129 500 ₽',
     material: 'Металл на выбор',
-    image: ring3,
+    images: ['/rings_new/05._Горные_шайбы_123.webp', '/rings_new/05.1._Горные_шайбы_123.webp', '/rings_new/05.2._Горные_шайбы_123.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Парные обручальные кольца', 'Фактурные'],
     specs: {
-      style: 'Прямые обручальные кольца «шайбы» с фактурой «Горы» в белом золоте.',
+      style: 'Прямые шайбы с фактурой «Горы».',
       female: { size: '16', width: '3 мм' },
       male:   { size: '18', width: '3,5 мм' },
       metals: [
@@ -407,14 +473,15 @@ const catalogItems = [
     }
   },
   {
-    title: 'Полусферы «Ямчатая»',
+    title: 'Прямые шайбы с ямчатой фактурой',
     desc: 'Полусферы с матовой ямчатой фактурой.',
-    price: 'от 81 582 ₽',
+    price: 'от 121 000 ₽',
     material: 'Металл на выбор',
-    image: ring18,
+    images: ['/rings_new/06._Полусферы_Ямчатые_123.webp', '/rings_new/06.1._Полусферы_Ямчатые_123.webp', '/rings_new/06.3._Полусферы_Ямчатые_123.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Парные обручальные кольца', 'Фактурные'],
     specs: {
-      style: 'Обручальные кольца полусферы с матовой ямчатой фактурой в белом золоте.',
+      style: 'Полусферы с матовой ямчатой фактурой.',
       female: { size: '16', width: '4 мм' },
       male:   { size: '18', width: '3,5 мм' },
       metals: [
@@ -428,14 +495,15 @@ const catalogItems = [
     }
   },
   {
-    title: 'Сатиновые шайбы',
-    desc: 'Шайбы с перекрёстной сатиновой матовкой и глянцевыми краями.',
-    price: 'от 101 600 ₽',
+    title: 'Сатиново-алмазные шайбы',
+    desc: 'Прямые обручальные кольца «шайбы» с перекрёстной сатиновой и алмазной матовкой и глянцевыми краями в белом золоте',
+    price: 'от 126 500 ₽',
     material: 'Металл на выбор',
-    image: ring9,
+    images: ['/rings_new/07._Сатиново-алмазные_шайбы_123.webp', '/rings_new/07.1._Сатиново-алмазные_шайбы_123.webp', '/rings_new/07.2._Сатиново-алмазные_шайбы_123.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Парные обручальные кольца', 'Фактурные'],
     specs: {
-      style: 'Прямые обручальные кольца «шайбы» с перекрёстной сатиновой матовкой и глянцевыми краями в белом золоте.',
+      style: 'Прямые обручальные кольца «шайбы» с перекрёстной сатиновой и алмазной матовкой и глянцевыми краями в белом золоте',
       female: { size: '16', width: '3 мм' },
       male:   { size: '18', width: '5 мм' },
       metals: [
@@ -451,12 +519,13 @@ const catalogItems = [
   {
     title: 'Шайбы «Полоски»',
     desc: 'Прямые шайбы с контрастными полосками в белом золоте.',
-    price: 'от 82 654 ₽',
+    price: 'от 123 400 ₽',
     material: 'Металл на выбор',
-    image: ring7,
+    images: ['/rings_new/08._Шайбы_Полоски_123.webp', '/rings_new/08.1._Шайбы_Полоски_123.webp', '/rings_new/08.2._Шайбы_Полоски_123.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Парные обручальные кольца', 'Фактурные'],
     specs: {
-      style: 'Прямые обручальные кольца «шайбы» с полосками в белом золоте.',
+      style: 'Прямые шайбы с контрастными полосками в белом золоте.',
       female: { size: '16', width: '2,5 мм' },
       male:   { size: '18', width: '3 мм' },
       metals: [
@@ -472,12 +541,13 @@ const catalogItems = [
   {
     title: 'Глянцевые шайбы с прорезью',
     desc: 'Глянцевые шайбы с прорезью в белом золоте.',
-    price: 'от 99 785 ₽',
+    price: 'от 125 500 ₽',
     material: 'Металл на выбор',
-    image: ring1,
+    images: ['/rings_new/09._Глянцевые_шайбы_с_прорезью_123.webp', '/rings_new/09.1._Глянцевые_шайбы_с_прорезью_123.webp', '/rings_new/09.2._Глянцевые_шайбы_с_прорезью_123.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Парные обручальные кольца', 'Фактурные'],
     specs: {
-      style: 'Глянцевые обручальные кольца «шайбы» с прорезью в белом золоте.',
+      style: 'Глянцевые шайбы с прорезью в белом золоте.',
       female: { size: '16', width: '3 мм' },
       male:   { size: '18', width: '5 мм' },
       metals: [
@@ -492,15 +562,16 @@ const catalogItems = [
   },
   {
     title: 'Шайбы «Глянец и мат» с бриллиантом',
-    desc: 'Прямые шайбы с глянцевой и матовой поверхностью и бриллиантом.',
-    price: 'от 117 689 ₽',
+    desc: 'Прямые обручальные кольца «шайбы» с глянцевой и матовой поверхностью в белом золоте и бриллиантами 0,03 ct. *Происхождение бриллиантов на выбор.',
+    price: 'от 137 000 ₽',
     material: 'Металл на выбор',
-    image: ring15,
+    images: ['/rings_new/10._Шайбы_Глянец_и_мат_с_бриллиантом_1234.webp', '/rings_new/10.1._Шайбы_Глянец_и_мат_с_бриллиантом_1234.webp', '/rings_new/10.2._Шайбы_Глянец_и_мат_с_бриллиантом_1234.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Парные обручальные кольца', 'Фактурные', 'С бриллиантами'],
     specs: {
-      style: 'Прямые обручальные кольца «шайбы» с глянцевой и матовой поверхностью и бриллиантом 2 мм в белом золоте.',
-      female: { size: '16', width: '3 мм', diamonds: 'Круг · 0,012 ct' },
-      male:   { size: '18', width: '5 мм' },
+      style: 'Прямые обручальные кольца «шайбы» с глянцевой и матовой поверхностью в белом золоте и бриллиантами 0,03 ct. *Происхождение бриллиантов на выбор.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '18', width: '4 мм' },
       metals: [
         { label: 'Серебро 925',            color: '#C7C9CE' },
         { label: 'Белое золото 585/750',   color: '#E4E6EA' },
@@ -514,10 +585,11 @@ const catalogItems = [
   {
     title: 'Перекрут «Бесконечность»',
     desc: 'Обручальные кольца перекрут «Бесконечность» в белом золоте.',
-    price: 'от 81 256 ₽',
+    price: 'от 122 500 ₽',
     material: 'Металл на выбор',
-    image: ring10,
+    images: ['/rings_new/11._Перекрут_Бесконечность_12.webp', '/rings_new/11.1._Перекрут_Бесконечность_12.webp', '/rings_new/11.2._Перекрут_Бесконечность_12.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Парные обручальные кольца'],
     specs: {
       style: 'Обручальные кольца перекрут «Бесконечность» в белом золоте.',
       female: { size: '16', width: '2,5 мм' },
@@ -533,14 +605,37 @@ const catalogItems = [
     }
   },
   {
-    title: 'Полусферы «Глянцевые ямки»',
-    desc: 'Полусферы с глянцевой ямчатой фактурой в белом золоте.',
-    price: 'от 76 845 ₽',
+    title: 'Перекрут «Бесконечность» с бриллиантами',
+    desc: 'Обручальные кольца перекрут «Бесконечность» с бриллиантовой россыпью 0,25 ct. в белом золоте',
+    price: 'от 138 500 ₽',
     material: 'Металл на выбор',
-    image: ring4,
+    images: ['/rings_new/12._Перекрут_Бесконечность_с_бриллиантами_124.webp', '/rings_new/12.1._Перекрут_Бесконечность_с_бриллиантами_124.webp', '/rings_new/12.2._Перекрут_Бесконечность_с_бриллиантами_124.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Парные обручальные кольца', 'С бриллиантами'],
     specs: {
-      style: 'Обручальные кольца полусферы с глянцевой ямчатой фактурой в белом золоте.',
+      style: 'Обручальные кольца перекрут «Бесконечность» с бриллиантовой россыпью 0,25 ct. в белом золоте',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '18', width: '3 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Полусферы «Глянцевые ямки»',
+    desc: 'Прямые обручальные кольца «шайбы» с глянцевой и матовой поверхностью в белом золоте и бриллиантом 0,012 ct. *Происхождение бриллиантов на выбор.',
+    price: 'от 137 000 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/13._Полусферы_Глянцевые_ямки_1234.webp', '/rings_new/13.1._Полусферы_Глянцевые_ямки_1234.webp', '/rings_new/13.2._Полусферы_Глянцевые_ямки_1234.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Парные обручальные кольца', 'Фактурные', 'С бриллиантами'],
+    specs: {
+      style: 'Прямые обручальные кольца «шайбы» с глянцевой и матовой поверхностью в белом золоте и бриллиантом 0,012 ct. *Происхождение бриллиантов на выбор.',
       female: { size: '18', width: '3,5 мм' },
       male:   { size: '16', width: '4 мм' },
       metals: [
@@ -555,13 +650,14 @@ const catalogItems = [
   },
   {
     title: 'Комфортные шайбы с бриллиантами',
-    desc: 'Кольца с комфортной посадкой, матовой и глянцевой поверхностью, прорезью и бриллиантами.',
-    price: 'от 135 478 ₽',
+    desc: 'Обручальные кольца с комфортной посадкой, матовой и глянцевой поверхностью, прорезью и вставками бриллиантов 1,5 мм в белом золоте. *Происхождение бриллиантов на выбор',
+    price: 'от 135 900 ₽',
     material: 'Металл на выбор',
-    image: ring5,
+    images: ['/rings_new/14._Комфортные_шайбы_с_бриллиантами_1234.webp', '/rings_new/14.1._Комфортные_шайбы_с_бриллиантами_1234.webp', '/rings_new/14.2._Комфортные_шайбы_с_бриллиантами_1234.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Парные обручальные кольца', 'Фактурные', 'С бриллиантами'],
     specs: {
-      style: 'Обручальные кольца с комфортной посадкой, матовой и глянцевой поверхностью, прорезью и вставками бриллиантов 1,5 мм в белом золоте.',
+      style: 'Обручальные кольца с комфортной посадкой, матовой и глянцевой поверхностью, прорезью и вставками бриллиантов 1,5 мм в белом золоте. *Происхождение бриллиантов на выбор',
       female: { size: '16', width: '3 мм', diamonds: 'Круг · 0,21 ct' },
       male:   { size: '18', width: '5 мм' },
       metals: [
@@ -576,13 +672,14 @@ const catalogItems = [
   },
   {
     title: 'Шайбы «Грани» с бриллиантами',
-    desc: 'Обручальные кольца с фактурой «Грани» и бриллиантами в белом золоте.',
-    price: 'от 121 943 ₽',
+    desc: 'Обручальные кольца с фактурой «Грани» и бриллиантами 1,25 мм в белом золоте.. Бриллианты 0,25 ct. *Происхождение бриллиантов на выбор',
+    price: 'от 127 800 ₽',
     material: 'Металл на выбор',
-    image: ring8,
+    images: ['/rings_new/15._Шайбы_Грани_с_бриллиантами_124.webp', '/rings_new/15.1._Шайбы_Грани_с_бриллиантами_124.webp', '/rings_new/15.2._Шайбы_Грани_с_бриллиантами_124.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Парные обручальные кольца', 'С бриллиантами'],
     specs: {
-      style: 'Обручальные кольца с фактурой «Грани» и бриллиантами 1,25 мм в белом золоте.',
+      style: 'Обручальные кольца с фактурой «Грани» и бриллиантами 1,25 мм в белом золоте.. Бриллианты 0,25 ct. *Происхождение бриллиантов на выбор',
       female: { size: '16', width: '3 мм', diamonds: 'Круг · 1,25 мм' },
       male:   { size: '18', width: '5 мм' },
       metals: [
@@ -598,12 +695,13 @@ const catalogItems = [
   {
     title: 'Шайбы «Волна»',
     desc: 'Прямые глянцевые шайбы с продольной фактурой «Волна» в белом золоте.',
-    price: 'от 89 547 ₽',
+    price: 'от 122 500 ₽',
     material: 'Металл на выбор',
-    image: ring19,
+    images: ['/rings_new/16._Шайбы_Волна_123.webp', '/rings_new/16.2._Шайбы_Волна_123.webp', '/rings_new/16.3._Шайбы_Волна_123.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Парные обручальные кольца', 'Фактурные'],
     specs: {
-      style: 'Прямые глянцевые обручальные кольца «шайбы» с продольной фактурой «Волна» в белом золоте.',
+      style: 'Прямые глянцевые шайбы с продольной фактурой «Волна» в белом золоте.',
       female: { size: '16', width: '3 мм' },
       male:   { size: '18', width: '5 мм' },
       metals: [
@@ -618,14 +716,15 @@ const catalogItems = [
   },
   {
     title: 'Двухцветные шайбы с бриллиантами',
-    desc: 'Составные двухцветные матовые шайбы с глянцевыми краями и бриллиантами.',
-    price: 'от 124 653 ₽',
+    desc: 'Составные двухцветные матовые обручальные кольца «шайбы» с глянцевыми краями и бриллиантами 1,5 мм в белом и красном золоте. *Происхождение бриллиантов на выбор.',
+    price: 'от 141 500 ₽',
     material: 'Металл на выбор',
-    image: ring12,
+    images: ['/rings_new/17._Двухцветные_шайбы_с_бриллиантами_1234.webp', '/rings_new/17.1._Двухцветные_шайбы_с_бриллиантами_1234.webp', '/rings_new/17.2._Двухцветные_шайбы_с_бриллиантами_1234.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Парные обручальные кольца', 'Фактурные', 'С бриллиантами'],
     specs: {
-      style: 'Составные двухцветные матовые обручальные кольца «шайбы» с глянцевыми краями и бриллиантами 1,5 мм в белом и красном золоте.',
-      female: { size: '16', width: '3 мм', diamonds: 'Круг · 0,19 ct' },
+      style: 'Составные двухцветные матовые обручальные кольца «шайбы» с глянцевыми краями и бриллиантами 1,5 мм в белом и красном золоте. *Происхождение бриллиантов на выбор.',
+      female: { size: '0,19', width: '3 мм' },
       male:   { size: '18', width: '5 мм' },
       metals: [
         { label: 'Серебро 925',            color: '#C7C9CE' },
@@ -639,13 +738,14 @@ const catalogItems = [
   },
   {
     title: 'Двухцветные шайбы с выемками',
-    desc: 'Комбинированные двухцветные шайбы с выемками и бриллиантами открытой дорожкой.',
-    price: 'от 121 859 ₽',
+    desc: 'Комбинированные двухцветные обручальные кольца «шайбы» с выемками и вставками бриллиантов открытой дорожкой 2 мм. *Происхождение бриллиантов на выбор',
+    price: 'от 139 950 ₽',
     material: 'Металл на выбор',
-    image: ring17,
+    images: ['/rings_new/18._Двухцветные_шайбы_с_выемками_1245.webp', '/rings_new/18.1._Двухцветные_шайбы_с_выемками_1245.webp', '/rings_new/18.2._Двухцветные_шайбы_с_выемками_1245.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Парные обручальные кольца', 'С бриллиантами', 'Комбинированные'],
     specs: {
-      style: 'Комбинированные двухцветные обручальные кольца «шайбы» с выемками и вставками бриллиантов открытой дорожкой 2 мм.',
+      style: 'Комбинированные двухцветные обручальные кольца «шайбы» с выемками и вставками бриллиантов открытой дорожкой 2 мм. *Происхождение бриллиантов на выбор',
       female: { size: '16', width: '3 мм', diamonds: 'Круг · 0,12 ct' },
       male:   { size: '18', width: '5 мм' },
       metals: [
@@ -659,42 +759,37 @@ const catalogItems = [
     }
   },
   {
-    title: 'Шайба',
-    desc: 'Прямой профиль с сатиновой матовкой и глянцевыми фасками. Парные.',
-    price: '78 000 ₽',
-    material: 'Пара · Бриллианты',
-    image: ring11,
+    title: 'Глянцевые шайбы с узором и бриллиантами',
+    desc: 'Прямые глянцевые шайбы. Женское — со вставкой бриллиантов огранки «Круг», мужское — гладкое глянцевое в бриллиантовой россыпью. *Происхождение бриллиантов на выбор',
+    price: 'от 141 000 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/19._Глянцевые_шайбы_с_узором_и_бриллиантами_124.webp', '/rings_new/19.1._Глянцевые_шайбы_с_узором_и_бриллиантами_124.webp', '/rings_new/19.2._Глянцевые_шайбы_с_узором_и_бриллиантами_124.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Парные обручальные кольца', 'С бриллиантами'],
     specs: {
-      style: 'Прямой профиль «шайба». Сатиновая продольная матовка с глянцевыми фасками. Женское — с дорожкой бриллиантов огранки «Круг», мужское — гладкое глянцевое.',
-      female: {
-        size: '16',
-        width: '3 мм',
-        diamonds: 'Круг · 0,013 ct'
-      },
-      male: {
-        size: '18',
-        width: '5 мм'
-      },
+      style: 'Прямые глянцевые шайбы. Женское — со вставкой бриллиантов огранки «Круг», мужское — гладкое глянцевое в бриллиантовой россыпью. *Происхождение бриллиантов на выбор',
+      female: { size: '0,19', width: '3 мм' },
+      male:   { size: '18', width: '5 мм' },
       metals: [
-        { label: 'Серебро 925',           color: '#C7C9CE' },
-        { label: 'Белое золото 585/750',  color: '#E4E6EA' },
-        { label: 'Жёлтое золото 585/750', color: '#E5C56A' },
-        { label: 'Красное золото 585/750',color: '#C8775A' },
-        { label: 'Розовое золото 585/750',color: '#E5B6A6' },
-        { label: 'Платина 950',           color: '#D6D8DC' }
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
       ]
     }
   },
   {
-    title: 'Матовые шайбы «Волна»',
+    title: 'Матовые полусферы «Волна»',
     desc: 'Прямые матовые шайбы с глянцевой фактурой «Волна».',
-    price: 'от 90 926 ₽',
+    price: 'от 125 600 ₽',
     material: 'Металл на выбор',
-    image: ring20,
+    images: ['/rings_new/20._Матовые_полусферы_Волна_123.webp', '/rings_new/20.1._Матовые_полусферы_Волна_123.webp', '/rings_new/20.2._Матовые_полусферы_Волна_123.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Парные обручальные кольца', 'Фактурные'],
     specs: {
-      style: 'Прямые матовые обручальные кольца «шайбы» с глянцевой фактурой «Волна» в белом золоте.',
+      style: 'Прямые матовые шайбы с глянцевой фактурой «Волна».',
       female: { size: '16', width: '3 мм' },
       male:   { size: '18', width: '5 мм' },
       metals: [
@@ -709,13 +804,14 @@ const catalogItems = [
   },
   {
     title: 'Гладкие шайбы с фасками и бриллиантами',
-    desc: 'Гладкие шайбы с фасками и бриллиантами 2 мм в белом золоте.',
-    price: 'от 108 685 ₽',
+    desc: 'Гладкие обручальные кольца «шайбы» с фасками и бриллиантами 2 мм в белом золоте. *Происхождение бриллиантов на выбор',
+    price: 'от 131 000 ₽',
     material: 'Металл на выбор',
-    image: ring16,
+    images: ['/rings_new/21._Гладкие_шайбы_с_фасками_и_бриллиантами_124.webp', '/rings_new/21.1._Гладкие_шайбы_с_фасками_и_бриллиантами_124.webp', '/rings_new/21.2._Гладкие_шайбы_с_фасками_и_бриллиантами_124.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Парные обручальные кольца', 'С бриллиантами'],
     specs: {
-      style: 'Гладкие обручальные кольца «шайбы» с фасками и бриллиантами 2 мм в белом золоте.',
+      style: 'Гладкие обручальные кольца «шайбы» с фасками и бриллиантами 2 мм в белом золоте. *Происхождение бриллиантов на выбор',
       female: { size: '16', width: '3 мм', diamonds: 'Круг · 0,2 ct' },
       male:   { size: '18', width: '5 мм' },
       metals: [
@@ -729,477 +825,16 @@ const catalogItems = [
     }
   },
   {
-    title: 'Помолвочное кольцо с бриллиантом',
-    desc: 'Помолвочное кольцо с крупным центральным бриллиантом.',
-    price: 'от 125 000 ₽',
-    material: 'Металл на выбор',
-    image: ring21,
-    bestseller: false,
-    specs: {
-      style: 'Помолвочное кольцо с бриллиантом в белом золоте.',
-      female: { size: '16', width: '2 мм', diamonds: 'Круг · 0,5 ct' },
-      male:   { size: '18', width: '3 мм' },
-      metals: [
-        { label: 'Серебро 925',            color: '#C7C9CE' },
-        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
-        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
-        { label: 'Красное золото 585/750', color: '#C8775A' },
-        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
-        { label: 'Платина 950',            color: '#D6D8DC' }
-      ]
-    }
-  },
-  {
-    title: 'Тонкая дорожка с бриллиантами',
-    desc: 'Тонкое обручальное кольцо с дорожкой мелких бриллиантов.',
-    price: 'от 98 000 ₽',
-    material: 'Металл на выбор',
-    image: ring22,
-    bestseller: false,
-    specs: {
-      style: 'Тонкая дорожка с бриллиантами в белом золоте.',
-      female: { size: '16', width: '2 мм', diamonds: 'Круг · 0,12 ct' },
-      male:   { size: '18', width: '3 мм' },
-      metals: [
-        { label: 'Серебро 925',            color: '#C7C9CE' },
-        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
-        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
-        { label: 'Красное золото 585/750', color: '#C8775A' },
-        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
-        { label: 'Платина 950',            color: '#D6D8DC' }
-      ]
-    }
-  },
-  {
-    title: 'Двухцветная шайба с дорожкой',
-    desc: 'Двухцветная обручальная шайба с дорожкой бриллиантов.',
-    price: 'от 115 000 ₽',
-    material: 'Металл на выбор',
-    image: ring23,
-    bestseller: false,
-    specs: {
-      style: 'Двухцветная шайба с дорожкой в белом золоте.',
-      female: { size: '16', width: '3 мм', diamonds: 'Круг · 0,18 ct' },
-      male:   { size: '18', width: '5 мм' },
-      metals: [
-        { label: 'Серебро 925',            color: '#C7C9CE' },
-        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
-        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
-        { label: 'Красное золото 585/750', color: '#C8775A' },
-        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
-        { label: 'Платина 950',            color: '#D6D8DC' }
-      ]
-    }
-  },
-  {
-    title: 'Широкая шайба с бриллиантами',
-    desc: 'Широкая обручальная шайба с бриллиантовой вставкой.',
-    price: 'от 118 000 ₽',
-    material: 'Металл на выбор',
-    image: ring24,
-    bestseller: false,
-    specs: {
-      style: 'Широкая шайба с бриллиантами в белом золоте.',
-      female: { size: '16', width: '4 мм', diamonds: 'Круг · 0,21 ct' },
-      male:   { size: '18', width: '5 мм' },
-      metals: [
-        { label: 'Серебро 925',            color: '#C7C9CE' },
-        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
-        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
-        { label: 'Красное золото 585/750', color: '#C8775A' },
-        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
-        { label: 'Платина 950',            color: '#D6D8DC' }
-      ]
-    }
-  },
-  {
-    title: 'Минималистичная дорожка с бриллиантами',
-    desc: 'Тонкое кольцо с минималистичной дорожкой бриллиантов.',
-    price: 'от 92 000 ₽',
-    material: 'Металл на выбор',
-    image: ring25,
-    bestseller: false,
-    specs: {
-      style: 'Минималистичная дорожка с бриллиантами в белом золоте.',
-      female: { size: '16', width: '2 мм', diamonds: 'Круг · 0,09 ct' },
-      male:   { size: '18', width: '2,5 мм' },
-      metals: [
-        { label: 'Серебро 925',            color: '#C7C9CE' },
-        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
-        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
-        { label: 'Красное золото 585/750', color: '#C8775A' },
-        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
-        { label: 'Платина 950',            color: '#D6D8DC' }
-      ]
-    }
-  },
-  {
-    title: 'Шайба с геометрической фактурой',
-    desc: 'Обручальная шайба с контрастной геометрической огранкой.',
-    price: 'от 88 000 ₽',
-    material: 'Металл на выбор',
-    image: ring26,
-    bestseller: false,
-    specs: {
-      style: 'Шайба с геометрической фактурой в белом золоте.',
-      female: { size: '16', width: '4 мм', },
-      male:   { size: '18', width: '5 мм' },
-      metals: [
-        { label: 'Серебро 925',            color: '#C7C9CE' },
-        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
-        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
-        { label: 'Красное золото 585/750', color: '#C8775A' },
-        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
-        { label: 'Платина 950',            color: '#D6D8DC' }
-      ]
-    }
-  },
-  {
-    title: 'Шайба с текстурой коры дерева',
-    desc: 'Обручальная шайба с фактурой, напоминающей кору дерева.',
-    price: 'от 86 000 ₽',
-    material: 'Металл на выбор',
-    image: ring27,
-    bestseller: false,
-    specs: {
-      style: 'Шайба с текстурой коры дерева в белом золоте.',
-      female: { size: '16', width: '3 мм', },
-      male:   { size: '18', width: '4 мм' },
-      metals: [
-        { label: 'Серебро 925',            color: '#C7C9CE' },
-        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
-        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
-        { label: 'Красное золото 585/750', color: '#C8775A' },
-        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
-        { label: 'Платина 950',            color: '#D6D8DC' }
-      ]
-    }
-  },
-  {
-    title: 'Шайба с одиночным бриллиантом',
-    desc: 'Обручальная шайба с центральным бриллиантом.',
-    price: 'от 108 000 ₽',
-    material: 'Металл на выбор',
-    image: ring28,
-    bestseller: false,
-    specs: {
-      style: 'Шайба с одиночным бриллиантом в белом золоте.',
-      female: { size: '16', width: '3 мм', diamonds: 'Круг · 0,04 ct' },
-      male:   { size: '18', width: '5 мм' },
-      metals: [
-        { label: 'Серебро 925',            color: '#C7C9CE' },
-        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
-        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
-        { label: 'Красное золото 585/750', color: '#C8775A' },
-        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
-        { label: 'Платина 950',            color: '#D6D8DC' }
-      ]
-    }
-  },
-  {
-    title: 'Шайба с волнистой фактурой',
-    desc: 'Обручальная шайба с волнистой текстурой поверхности.',
-    price: 'от 84 000 ₽',
-    material: 'Металл на выбор',
-    image: ring29,
-    bestseller: false,
-    specs: {
-      style: 'Шайба с волнистой фактурой в белом золоте.',
-      female: { size: '16', width: '3 мм', },
-      male:   { size: '18', width: '4 мм' },
-      metals: [
-        { label: 'Серебро 925',            color: '#C7C9CE' },
-        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
-        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
-        { label: 'Красное золото 585/750', color: '#C8775A' },
-        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
-        { label: 'Платина 950',            color: '#D6D8DC' }
-      ]
-    }
-  },
-  {
-    title: 'Шайба с диагональной насечкой',
-    desc: 'Обручальная шайба с диагональной алмазной насечкой.',
-    price: 'от 89 000 ₽',
-    material: 'Металл на выбор',
-    image: ring30,
-    bestseller: false,
-    specs: {
-      style: 'Шайба с диагональной насечкой в белом золоте.',
-      female: { size: '16', width: '3,5 мм', },
-      male:   { size: '18', width: '5 мм' },
-      metals: [
-        { label: 'Серебро 925',            color: '#C7C9CE' },
-        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
-        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
-        { label: 'Красное золото 585/750', color: '#C8775A' },
-        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
-        { label: 'Платина 950',            color: '#D6D8DC' }
-      ]
-    }
-  },
-  {
-    title: 'Матовая шайба с глянцевым центром',
-    desc: 'Матовая обручальная шайба с глянцевой центральной полосой.',
-    price: 'от 94 000 ₽',
-    material: 'Металл на выбор',
-    image: ring31,
-    bestseller: false,
-    specs: {
-      style: 'Матовая шайба с глянцевым центром в белом золоте.',
-      female: { size: '16', width: '3 мм', },
-      male:   { size: '18', width: '5 мм' },
-      metals: [
-        { label: 'Серебро 925',            color: '#C7C9CE' },
-        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
-        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
-        { label: 'Красное золото 585/750', color: '#C8775A' },
-        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
-        { label: 'Платина 950',            color: '#D6D8DC' }
-      ]
-    }
-  },
-  {
-    title: 'Широкая матовая шайба',
-    desc: 'Широкая матовая обручальная шайба с гладкой поверхностью.',
-    price: 'от 91 000 ₽',
-    material: 'Металл на выбор',
-    image: ring32,
-    bestseller: false,
-    specs: {
-      style: 'Широкая матовая шайба в белом золоте.',
-      female: { size: '16', width: '4 мм', },
-      male:   { size: '18', width: '5 мм' },
-      metals: [
-        { label: 'Серебро 925',            color: '#C7C9CE' },
-        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
-        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
-        { label: 'Красное золото 585/750', color: '#C8775A' },
-        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
-        { label: 'Платина 950',            color: '#D6D8DC' }
-      ]
-    }
-  },
-  {
-    title: 'Тонкая шайба с микро-бриллиантами',
-    desc: 'Тонкое кольцо с микро-бриллиантами по всему ободку.',
-    price: 'от 96 000 ₽',
-    material: 'Металл на выбор',
-    image: ring33,
-    bestseller: false,
-    specs: {
-      style: 'Тонкая шайба с микро-бриллиантами в белом золоте.',
-      female: { size: '16', width: '2 мм', diamonds: 'Круг · 0,11 ct' },
-      male:   { size: '18', width: '2,5 мм' },
-      metals: [
-        { label: 'Серебро 925',            color: '#C7C9CE' },
-        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
-        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
-        { label: 'Красное золото 585/750', color: '#C8775A' },
-        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
-        { label: 'Платина 950',            color: '#D6D8DC' }
-      ]
-    }
-  },
-  {
-    title: 'Шайба с двойной дорожкой камней',
-    desc: 'Обручальная шайба с двумя дорожками бриллиантов.',
-    price: 'от 122 000 ₽',
-    material: 'Металл на выбор',
-    image: ring34,
-    bestseller: false,
-    specs: {
-      style: 'Шайба с двойной дорожкой камней в белом золоте.',
-      female: { size: '16', width: '3 мм', diamonds: 'Круг · 0,24 ct' },
-      male:   { size: '18', width: '5 мм' },
-      metals: [
-        { label: 'Серебро 925',            color: '#C7C9CE' },
-        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
-        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
-        { label: 'Красное золото 585/750', color: '#C8775A' },
-        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
-        { label: 'Платина 950',            color: '#D6D8DC' }
-      ]
-    }
-  },
-  {
-    title: 'Шайба с перекрёстной сатиновкой',
-    desc: 'Обручальная шайба с перекрёстной сатиновой матовкой.',
-    price: 'от 87 000 ₽',
-    material: 'Металл на выбор',
-    image: ring35,
-    bestseller: false,
-    specs: {
-      style: 'Шайба с перекрёстной сатиновкой в белом золоте.',
-      female: { size: '16', width: '3 мм', },
-      male:   { size: '18', width: '5 мм' },
-      metals: [
-        { label: 'Серебро 925',            color: '#C7C9CE' },
-        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
-        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
-        { label: 'Красное золото 585/750', color: '#C8775A' },
-        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
-        { label: 'Платина 950',            color: '#D6D8DC' }
-      ]
-    }
-  },
-  {
-    title: 'Обручальное кольцо с центральным бриллиантом',
-    desc: 'Классическое обручальное кольцо с центральным бриллиантом.',
-    price: 'от 112 000 ₽',
-    material: 'Металл на выбор',
-    image: ring36,
-    bestseller: false,
-    specs: {
-      style: 'Обручальное кольцо с центральным бриллиантом в белом золоте.',
-      female: { size: '16', width: '3 мм', diamonds: 'Круг · 0,05 ct' },
-      male:   { size: '18', width: '5 мм' },
-      metals: [
-        { label: 'Серебро 925',            color: '#C7C9CE' },
-        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
-        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
-        { label: 'Красное золото 585/750', color: '#C8775A' },
-        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
-        { label: 'Платина 950',            color: '#D6D8DC' }
-      ]
-    }
-  },
-  {
-    title: 'Шайба с рустикальной фактурой',
-    desc: 'Обручальная шайба с рустикальной текстурой металла.',
-    price: 'от 85 000 ₽',
-    material: 'Металл на выбор',
-    image: ring37,
-    bestseller: false,
-    specs: {
-      style: 'Шайба с рустикальной фактурой в белом золоте.',
-      female: { size: '16', width: '3,5 мм', },
-      male:   { size: '18', width: '5 мм' },
-      metals: [
-        { label: 'Серебро 925',            color: '#C7C9CE' },
-        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
-        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
-        { label: 'Красное золото 585/750', color: '#C8775A' },
-        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
-        { label: 'Платина 950',            color: '#D6D8DC' }
-      ]
-    }
-  },
-  {
-    title: 'Глянцевая шайба с выемкой',
-    desc: 'Глянцевая обручальная шайба с декоративной выемкой.',
-    price: 'от 90 000 ₽',
-    material: 'Металл на выбор',
-    image: ring38,
-    bestseller: false,
-    specs: {
-      style: 'Глянцевая шайба с выемкой в белом золоте.',
-      female: { size: '16', width: '3 мм', },
-      male:   { size: '18', width: '5 мм' },
-      metals: [
-        { label: 'Серебро 925',            color: '#C7C9CE' },
-        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
-        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
-        { label: 'Красное золото 585/750', color: '#C8775A' },
-        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
-        { label: 'Платина 950',            color: '#D6D8DC' }
-      ]
-    }
-  },
-  {
-    title: 'Шайба с дорожкой и фасками',
-    desc: 'Обручальная шайба с дорожкой бриллиантов и фасками.',
-    price: 'от 105 000 ₽',
-    material: 'Металл на выбор',
-    image: ring39,
-    bestseller: false,
-    specs: {
-      style: 'Шайба с дорожкой и фасками в белом золоте.',
-      female: { size: '16', width: '3 мм', diamonds: 'Круг · 0,16 ct' },
-      male:   { size: '18', width: '5 мм' },
-      metals: [
-        { label: 'Серебро 925',            color: '#C7C9CE' },
-        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
-        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
-        { label: 'Красное золото 585/750', color: '#C8775A' },
-        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
-        { label: 'Платина 950',            color: '#D6D8DC' }
-      ]
-    }
-  },
-  {
-    title: 'Миниатюрная дорожка с бриллиантами',
-    desc: 'Миниатюрное кольцо с тонкой дорожкой бриллиантов.',
-    price: 'от 88 000 ₽',
-    material: 'Металл на выбор',
-    image: ring40,
-    bestseller: false,
-    specs: {
-      style: 'Миниатюрная дорожка с бриллиантами в белом золоте.',
-      female: { size: '16', width: '1,8 мм', diamonds: 'Круг · 0,07 ct' },
-      male:   { size: '18', width: '2,5 мм' },
-      metals: [
-        { label: 'Серебро 925',            color: '#C7C9CE' },
-        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
-        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
-        { label: 'Красное золото 585/750', color: '#C8775A' },
-        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
-        { label: 'Платина 950',            color: '#D6D8DC' }
-      ]
-    }
-  },
-  {
-    title: 'Шайба с вертикальной шлифовкой',
-    desc: 'Обручальная шайба с вертикальной сатиновой шлифовкой.',
-    price: 'от 83 000 ₽',
-    material: 'Металл на выбор',
-    image: ring41,
-    bestseller: false,
-    specs: {
-      style: 'Шайба с вертикальной шлифовкой в белом золоте.',
-      female: { size: '16', width: '3,5 мм', },
-      male:   { size: '18', width: '5 мм' },
-      metals: [
-        { label: 'Серебро 925',            color: '#C7C9CE' },
-        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
-        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
-        { label: 'Красное золото 585/750', color: '#C8775A' },
-        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
-        { label: 'Платина 950',            color: '#D6D8DC' }
-      ]
-    }
-  },
-  {
-    title: 'Двухцветная шайба с канавкой',
-    desc: 'Двухцветная обручальная шайба с декоративной канавкой.',
-    price: 'от 102 000 ₽',
-    material: 'Металл на выбор',
-    image: ring42,
-    bestseller: false,
-    specs: {
-      style: 'Двухцветная шайба с канавкой в белом золоте.',
-      female: { size: '16', width: '3 мм', },
-      male:   { size: '18', width: '5 мм' },
-      metals: [
-        { label: 'Серебро 925',            color: '#C7C9CE' },
-        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
-        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
-        { label: 'Красное золото 585/750', color: '#C8775A' },
-        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
-        { label: 'Платина 950',            color: '#D6D8DC' }
-      ]
-    }
-  },
-  {
-    title: 'Шайба с бриллиантовой пластиной',
-    desc: 'Обручальная шайба с вставкой из мелких бриллиантов.',
+    title: 'Полусферы из желтого золота',
+    desc: 'Гладкие обручальные кольца полусферы из желтого золота',
     price: 'от 110 000 ₽',
     material: 'Металл на выбор',
-    image: ring43,
+    images: ['/rings_new/22._Полусферы_из_желтого_золота.webp', '/rings_new/22.1._Полусферы_из_желтого_золота.webp', '/rings_new/22.2._Полусферы_из_желтого_золота.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Парные обручальные кольца'],
     specs: {
-      style: 'Шайба с бриллиантовой пластиной в белом золоте.',
-      female: { size: '16', width: '3 мм', diamonds: 'Круг · 0,14 ct' },
+      style: 'Гладкие обручальные кольца полусферы из желтого золота',
+      female: { size: '16', width: '3 мм' },
       male:   { size: '18', width: '5 мм' },
       metals: [
         { label: 'Серебро 925',            color: '#C7C9CE' },
@@ -1212,15 +847,16 @@ const catalogItems = [
     }
   },
   {
-    title: 'Фактурная шайба с полированными гранями',
-    desc: 'Обручальная шайба с фактурной поверхностью и полированными гранями.',
-    price: 'от 93 000 ₽',
+    title: 'Полусферы из белого золота',
+    desc: 'Гладкие обручальные кольца полусферы из желтого золота',
+    price: 'от 110 000 ₽',
     material: 'Металл на выбор',
-    image: ring44,
+    images: ['/rings_new/23._Полусферы_из_белого_золота_12.webp', '/rings_new/23.1._Полусферы_из_белого_золота_12.webp', '/rings_new/23.2._Полусферы_из_белого_золота_12.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Парные обручальные кольца'],
     specs: {
-      style: 'Фактурная шайба с полированными гранями в белом золоте.',
-      female: { size: '16', width: '3 мм', },
+      style: 'Гладкие обручальные кольца полусферы из желтого золота',
+      female: { size: '16', width: '3 мм' },
       male:   { size: '18', width: '5 мм' },
       metals: [
         { label: 'Серебро 925',            color: '#C7C9CE' },
@@ -1233,15 +869,16 @@ const catalogItems = [
     }
   },
   {
-    title: 'Шайба с горизонтальной насечкой',
-    desc: 'Обручальная шайба с горизонтальной алмазной насечкой.',
-    price: 'от 82 000 ₽',
+    title: 'Матовые полусферы',
+    desc: 'Матовые обручальные кольца из белого золота',
+    price: 'от 110 000 ₽',
     material: 'Металл на выбор',
-    image: ring45,
+    images: ['/rings_new/24._Матовые_полусферы_123.webp', '/rings_new/24.1._Матовые_полусферы_123.webp', '/rings_new/24.2._Матовые_полусферы_123.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Парные обручальные кольца', 'Фактурные'],
     specs: {
-      style: 'Шайба с горизонтальной насечкой в белом золоте.',
-      female: { size: '16', width: '3,5 мм', },
+      style: 'Матовые обручальные кольца из белого золота',
+      female: { size: '16', width: '3 мм' },
       male:   { size: '18', width: '5 мм' },
       metals: [
         { label: 'Серебро 925',            color: '#C7C9CE' },
@@ -1254,15 +891,588 @@ const catalogItems = [
     }
   },
   {
-    title: 'Широкая матовая шайба с глянцевыми краями',
-    desc: 'Широкая матовая шайба с глянцевыми скошенными краями.',
-    price: 'от 99 000 ₽',
+    title: 'Кольцо с фактурой "Барханы"',
+    desc: 'Кольцо из белого золота с фактурой "Барханы"',
+    price: 'от 50 000 ₽',
     material: 'Металл на выбор',
-    image: ring46,
+    images: ['/rings_new/25._Кольцо_с_фактурой_Барханы_13.webp', '/rings_new/25.1._Кольцо_с_фактурой_Барханы_13.webp', '/rings_new/25.2._Кольцо_с_фактурой_Барханы_13.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные'],
     specs: {
-      style: 'Широкая матовая шайба с глянцевыми краями в белом золоте.',
-      female: { size: '16', width: '4 мм', },
+      style: 'Кольцо из белого золота с фактурой "Барханы"',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '18', width: '4 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Кольцо с бриллиантовой дорожкой',
+    desc: 'Кольцо из белого золота с бриллиантовой россыпью 0,2 ct. *Происхождение бриллиантов на выбор.',
+    price: 'от 70 000 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/26._Кольцо_с_бриллиантовой_дорожкой_14.webp', '/rings_new/26.1._Кольцо_с_бриллиантовой_дорожкой_14.webp', '/rings_new/26.2._Кольцо_с_бриллиантовой_дорожкой_14.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'С бриллиантами'],
+    specs: {
+      style: 'Кольцо из белого золота с бриллиантовой россыпью 0,2 ct. *Происхождение бриллиантов на выбор.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16,5', width: '4 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Кольцо с россыпью бриллиантов и выемкой',
+    desc: 'Кольцо из белого золота с бриллиантовой россыпью 0,25 ct. *Происхождение бриллиантов на выбор.',
+    price: 'от 73 000 ₽ .',
+    material: 'Металл на выбор',
+    images: ['/rings_new/27._Кольцо_с_россыпью_бриллиантов_и_выемкой_14.webp', '/rings_new/27.1._Кольцо_с_россыпью_бриллиантов_и_выемкой_14.webp', '/rings_new/27.2._Кольцо_с_россыпью_бриллиантов_и_выемкой_14.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'С бриллиантами'],
+    specs: {
+      style: 'Кольцо из белого золота с бриллиантовой россыпью 0,25 ct. *Происхождение бриллиантов на выбор.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16,5', width: '2,2 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Полусфера поперечное "Дерево"',
+    desc: 'Полусфера из белого золото с поперечной фактурой "Дерево"',
+    price: 'от 50 000 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/28._Полусфера_поперечное_Дерево_13.webp', '/rings_new/28.1._Полусфера_поперечное_Дерево_13.webp', '/rings_new/28.2._Полусфера_поперечное_Дерево_13.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные'],
+    specs: {
+      style: 'Полусфера из белого золото с поперечной фактурой "Дерево"',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16,5', width: '3 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Кольцо "Половинка"',
+    desc: 'Кольцо из белого золота с глянцевой и продольной матовой фактурой в полоину кольца',
+    price: 'от 50 000 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/29._Кольцо_Половинка_135.webp', '/rings_new/29.1._Кольцо_Половинка_135.webp', '/rings_new/29.2._Кольцо_Половинка_135.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные', 'Комбинированные'],
+    specs: {
+      style: 'Кольцо из белого золота с глянцевой и продольной матовой фактурой в полоину кольца',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16,5', width: '4 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Шайба поперечное "Дерево"',
+    desc: 'Шайба из белого золота с поперечной фактурой "Дерево"',
+    price: 'от 50 000 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/30._Шайба_поперечное_Дерево_13.webp', '/rings_new/30.1._Шайба_поперечное_Дерево_13.webp', '/rings_new/30.2._Шайба_поперечное_Дерево_13.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные'],
+    specs: {
+      style: 'Шайба из белого золота с поперечной фактурой "Дерево"',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16,5', width: '3 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Шайба с фактурой "Волна"',
+    desc: 'Шайба из белого золота с поперечной фактурой "Волна"',
+    price: 'от 50 000 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/31._Шайба_с_фактурой_Волна_13.webp', '/rings_new/31.1._Шайба_с_фактурой_Волна_13.webp', '/rings_new/31.2._Шайба_с_фактурой_Волна_13.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные'],
+    specs: {
+      style: 'Шайба из белого золота с поперечной фактурой "Волна"',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16,5', width: '4 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Бриллиантовая дорожка в 1/3 кольца',
+    desc: 'Кольцо из белого золота с бриллиантовой россыпью 0,17 ct. *Происхождение бриллиантов на выбор.',
+    price: 'от 71 000 ₽ .',
+    material: 'Металл на выбор',
+    images: ['/rings_new/32._Бриллиантовая_дорожка_в_13_кольца_14.webp', '/rings_new/32.1._Бриллиантовая_дорожка_в_13_кольца_14.webp', '/rings_new/32.3._Бриллиантовая_дорожка_в_13_кольца_14.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'С бриллиантами'],
+    specs: {
+      style: 'Кольцо из белого золота с бриллиантовой россыпью 0,17 ct. *Происхождение бриллиантов на выбор.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16,5', width: '2 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Россыпь бриллиантов в 1/4 кольца',
+    desc: 'Кольцо из белого золота с бриллиантовой россыпью 0,2 ct. *Происхождение бриллиантов на выбор.',
+    price: 'от 73 000 ₽ .',
+    material: 'Металл на выбор',
+    images: ['/rings_new/33._Россыпь_бриллиантов_в_14_кольца_14.webp', '/rings_new/33.1._Россыпь_бриллиантов_в_1.4_кольца_14.webp', '/rings_new/33.3._Россыпь_бриллиантов_в_1.4_кольца_14.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'С бриллиантами'],
+    specs: {
+      style: 'Кольцо из белого золота с бриллиантовой россыпью 0,2 ct. *Происхождение бриллиантов на выбор.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16,5', width: '3,5 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Дорожка закрытая в 1/2 кольца',
+    desc: 'Кольцо из белого золота с бриллиантовой россыпью 0,22 ct. *Происхождение бриллиантов на выбор.',
+    price: 'от 75 000 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/34._Дорожка_закрытая_в_12_кольца_14.webp', '/rings_new/34.1._Дорожка_закрытая_в_12_кольца_14.webp', '/rings_new/34.3._Дорожка_закрытая_в_12_кольца_14.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'С бриллиантами'],
+    specs: {
+      style: 'Кольцо из белого золота с бриллиантовой россыпью 0,22 ct. *Происхождение бриллиантов на выбор.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16,5', width: '2,2 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Открытая дорожка из бриллиантов изумрудного цвета',
+    desc: 'Кольцо из белого золота с дорожкой из бриллиантов изумрудного цвета 0,22 ct. *Происхождение бриллиантов на выбор.',
+    price: 'от 73 500 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/35._Открытая_дорожка_из_бриллиантов_изумрудного_цвета.webp', '/rings_new/35.1._Открытая_дорожка_из_бриллиантов_изумрудного_цвета.webp', '/rings_new/35.3._Открытая_дорожка_из_бриллиантов_изумрудного_цвета.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'С бриллиантами'],
+    specs: {
+      style: 'Кольцо из белого золота с дорожкой из бриллиантов изумрудного цвета 0,22 ct. *Происхождение бриллиантов на выбор.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16,5', width: '2 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Открытая россыпь бриллиантов в 1/4 кольца',
+    desc: 'Кольцо из белого золота с бриллиантовой россыпью цвета 0,22 ct. *Происхождение бриллиантов на выбор.',
+    price: 'от 75 000 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/36._Открытая_россыпь_бриллиантов_в_1.4_кольца_14.webp', '/rings_new/36.1._Открытая_россыпь_бриллиантов_в_1.4_кольца_14.webp', '/rings_new/36.2._Открытая_россыпь_бриллиантов_в_1.4_кольца_14.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'С бриллиантами'],
+    specs: {
+      style: 'Кольцо из белого золота с бриллиантовой россыпью цвета 0,22 ct. *Происхождение бриллиантов на выбор.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16,5', width: '4 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Отпечаток пальчика внутри кольца',
+    desc: 'Кольцо любой формы из белого золота с отпечатком пальца с внутренней или внешней стороны колечка',
+    price: 'от 55 000 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/37._Отпечаток_пальчика_внутри_кольца_13.webp', '/rings_new/37.1._Отпечаток_пальчика_внетри_кольца_13.webp', '/rings_new/37.2._Отпечаток_пальчика_внутри_кольца_13.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные'],
+    specs: {
+      style: 'Кольцо любой формы из белого золота с отпечатком пальца с внутренней или внешней стороны колечка',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16,5', width: '4,5 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Бриллиантовая россыпь в половину колечка',
+    desc: 'Кольцо из белого золота с бриллиантовой россыпью 0,22 ct. *Происхождение бриллиантов на выбор.',
+    price: 'от 73 000 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/38._Бриллиантовая_россыпь_в_половину_колечка_14.webp', '/rings_new/38.1._Бриллиантовая_россыпь_в_половину_колечка_14.webp', '/rings_new/38.2._Бриллиантовая_россыпь_в_половину_колечка_14.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'С бриллиантами'],
+    specs: {
+      style: 'Кольцо из белого золота с бриллиантовой россыпью 0,22 ct. *Происхождение бриллиантов на выбор.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16', width: '1,7 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Матовое кольцо с волной',
+    desc: 'Шайба из белого золота с продольной волной',
+    price: 'от 50 000 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/39._Матовое_кольцо_с_волной_13.webp', '/rings_new/39.1._Матовое_кольцо_с_волной_13.webp', '/rings_new/39.2._Матовое_кольцо_с_волной_13.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные'],
+    specs: {
+      style: 'Шайба из белого золота с продольной волной',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16', width: '3 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Глянцевая шайба с бриллиантами 3х3',
+    desc: 'Кольцо из белого золота с бриллиантовой вставкой 0,2 ct. *Происхождение бриллиантов на выбор.',
+    price: 'от 77 000 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/40._Глянцевая_шайба_с_бриллиантами_3х3_14.webp', '/rings_new/40.1._Глянцевая_шайба_с_бриллиантами_3х3_14.webp', '/rings_new/40.2._Глянцевая_шайба_с_бриллиантами_3х3_14.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'С бриллиантами'],
+    specs: {
+      style: 'Кольцо из белого золота с бриллиантовой вставкой 0,2 ct. *Происхождение бриллиантов на выбор.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16', width: '4 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Полусфера с роскошной россыпью камней',
+    desc: 'Кольцо из белого золота с бриллиантовой вставкой 0,27 ct. *Происхождение бриллиантов на выбор.',
+    price: 'от 79 000 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/41._Полусфера_с_роскошной_россыпью_камней_14.webp', '/rings_new/41.1._Полусфера_с_роскошной_россыпью_камней_14.webp', '/rings_new/41.2._Полусфера_с_роскошной_россыпью_камней_14.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'С бриллиантами'],
+    specs: {
+      style: 'Кольцо из белого золота с бриллиантовой вставкой 0,27 ct. *Происхождение бриллиантов на выбор.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '15', width: '3,5 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: '42. Шайба с хаотичной матовкой',
+    desc: 'Прямая шайба из белого золота с хаотичной матовкой по всей окружности',
+    price: 'от 51 000 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/42._Шайба_с_хаотичной_матовкой_13.webp', '/rings_new/42.1._Шайба_с_хаотичной_матовкой_13.webp', '/rings_new/42.2._Шайба_с_хаотичной_матовкой_13.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные'],
+    specs: {
+      style: 'Прямая шайба из белого золота с хаотичной матовкой по всей окружности',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16', width: '3,5 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Прямая матовая шайба с ямчатой фактурой',
+    desc: 'Обручальное кольцо шайба с матовой ямчатой фактурой в белом золоте.',
+    price: 'от 59 500 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/06._Полусферы_Ямчатые_123.webp', '/rings_new/06.1._Полусферы_Ямчатые_123.webp', '/rings_new/06.3._Полусферы_Ямчатые_123.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные'],
+    specs: {
+      style: 'Обручальное кольцо шайба с матовой ямчатой фактурой в белом золоте.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16', width: '3,5 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Глянцевая шайба с фасками и бриллиантами',
+    desc: 'Кольцо из белого золота с бриллиантовой вставкой 0,15 ct. *Происхождение бриллиантов на выбор.',
+    price: 'от 78 500₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/21._Гладкие_шайбы_с_фасками_и_бриллиантами_124.webp', '/rings_new/21.1._Гладкие_шайбы_с_фасками_и_бриллиантами_124.webp', '/rings_new/21.2._Гладкие_шайбы_с_фасками_и_бриллиантами_124.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'С бриллиантами'],
+    specs: {
+      style: 'Кольцо из белого золота с бриллиантовой вставкой 0,15 ct. *Происхождение бриллиантов на выбор.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '15', width: '3,5 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Прямая глянцевая шайба с узором и бриллиантми',
+    desc: 'Кольцо из белого золота с бриллиантовой вставкой 0,12 ct. *Происхождение бриллиантов на выбор.',
+    price: 'от 72 000 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/14._Комфортные_шайбы_с_бриллиантами_1234.webp', '/rings_new/14.1._Комфортные_шайбы_с_бриллиантами_1234.webp', '/rings_new/14.2._Комфортные_шайбы_с_бриллиантами_1234.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'С бриллиантами'],
+    specs: {
+      style: 'Кольцо из белого золота с бриллиантовой вставкой 0,12 ct. *Происхождение бриллиантов на выбор.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '15', width: '4 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Прямая глянцевая шайба с узором и бриллиантми',
+    desc: 'Кольцо из белого золота с бриллиантовой вставкой 0,1 ct. *Происхождение бриллиантов на выбор.',
+    price: 'от 73 000 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/14._Комфортные_шайбы_с_бриллиантами_1234.webp', '/rings_new/14.1._Комфортные_шайбы_с_бриллиантами_1234.webp', '/rings_new/14.2._Комфортные_шайбы_с_бриллиантами_1234.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'С бриллиантами'],
+    specs: {
+      style: 'Кольцо из белого золота с бриллиантовой вставкой 0,1 ct. *Происхождение бриллиантов на выбор.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16', width: '4 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Комбинированная матовая и глянцевая шайба со вставками бриллиантов',
+    desc: 'Комбинированное кольцо из красного и белого золота с бриллиантовой вставкой 0,03 ct. *Происхождение бриллиантов на выбор.',
+    price: 'от 80 000 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/17._Двухцветные_шайбы_с_бриллиантами_1234.webp', '/rings_new/17.1._Двухцветные_шайбы_с_бриллиантами_1234.webp', '/rings_new/17.2._Двухцветные_шайбы_с_бриллиантами_1234.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные', 'С бриллиантами', 'Комбинированные'],
+    specs: {
+      style: 'Комбинированное кольцо из красного и белого золота с бриллиантовой вставкой 0,03 ct. *Происхождение бриллиантов на выбор.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16', width: '3,5 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Комбинированная матовая и глянцевая шайба со вставками черных бриллиантов',
+    desc: 'Комбинированное кольцо из красного и белого золота с бриллиантовой вставкой 0,05 ct. *Происхождение бриллиантов на выбор.',
+    price: 'от 80 000 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/17._Двухцветные_шайбы_с_бриллиантами_1234.webp', '/rings_new/17.1._Двухцветные_шайбы_с_бриллиантами_1234.webp', '/rings_new/17.2._Двухцветные_шайбы_с_бриллиантами_1234.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные', 'С бриллиантами', 'Комбинированные'],
+    specs: {
+      style: 'Комбинированное кольцо из красного и белого золота с бриллиантовой вставкой 0,05 ct. *Происхождение бриллиантов на выбор.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '18', width: '4 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Прямая матовая шайба с фасками и узором',
+    desc: 'Матовая шайба с прорезями из белого золота',
+    price: 'от 59 500 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/14._Комфортные_шайбы_с_бриллиантами_1234.webp', '/rings_new/14.1._Комфортные_шайбы_с_бриллиантами_1234.webp', '/rings_new/14.2._Комфортные_шайбы_с_бриллиантами_1234.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные'],
+    specs: {
+      style: 'Матовая шайба с прорезями из белого золота',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16', width: '3,5 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Прямая глянцевая шайба с узором и бриллиантми',
+    desc: 'Кольцо из белого золота с бриллиантовой вставкой 0,12 ct. *Происхождение бриллиантов на выбор.',
+    price: 'от 75 500 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/14._Комфортные_шайбы_с_бриллиантами_1234.webp', '/rings_new/14.1._Комфортные_шайбы_с_бриллиантами_1234.webp', '/rings_new/14.2._Комфортные_шайбы_с_бриллиантами_1234.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные', 'С бриллиантами'],
+    specs: {
+      style: 'Кольцо из белого золота с бриллиантовой вставкой 0,12 ct. *Происхождение бриллиантов на выбор.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16', width: '3,5 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Прямая шайба с сатиновой матовкой',
+    desc: 'Прямая «шайбы» с перекрёстной сатиновой матовкой и глянцевыми краями в белом золоте',
+    price: 'от 58 900 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/07._Сатиново-алмазные_шайбы_123.webp', '/rings_new/07.1._Сатиново-алмазные_шайбы_123.webp', '/rings_new/07.2._Сатиново-алмазные_шайбы_123.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные'],
+    specs: {
+      style: 'Прямая «шайбы» с перекрёстной сатиновой матовкой и глянцевыми краями в белом золоте',
+      female: { size: '16', width: '3 мм' },
       male:   { size: '18', width: '5 мм' },
       metals: [
         { label: 'Серебро 925',            color: '#C7C9CE' },
@@ -1275,16 +1485,17 @@ const catalogItems = [
     }
   },
   {
-    title: 'Тонкая шайба с центральным камнем',
-    desc: 'Тонкое обручальное кольцо с центральным бриллиантом.',
-    price: 'от 104 000 ₽',
+    title: 'Глянцевая шайба с фасками',
+    desc: 'Прямая «шайбы» с алмазной матовкой и глянцевыми краями в белом золоте',
+    price: 'от 59 500 ₽',
     material: 'Металл на выбор',
-    image: ring47,
+    images: ['/rings_new/07._Сатиново-алмазные_шайбы_123.webp', '/rings_new/07.1._Сатиново-алмазные_шайбы_123.webp', '/rings_new/07.2._Сатиново-алмазные_шайбы_123.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные'],
     specs: {
-      style: 'Тонкая шайба с центральным камнем в белом золоте.',
-      female: { size: '16', width: '2 мм', diamonds: 'Круг · 0,03 ct' },
-      male:   { size: '18', width: '3 мм' },
+      style: 'Прямая «шайбы» с алмазной матовкой и глянцевыми краями в белом золоте',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16', width: '3 мм' },
       metals: [
         { label: 'Серебро 925',            color: '#C7C9CE' },
         { label: 'Белое золото 585/750',   color: '#E4E6EA' },
@@ -1296,15 +1507,192 @@ const catalogItems = [
     }
   },
   {
-    title: 'Шайба с двойной текстурой',
-    desc: 'Обручальная шайба с сочетанием матовой и глянцевой текстуры.',
-    price: 'от 95 000 ₽',
+    title: 'Прямая шайба "Зимний лёд"',
+    desc: 'Прямые обручальные кольца «шайбы» с фактурой «Зимний лёд» в белом золоте.',
+    price: 'от 62 500 ₽ .',
     material: 'Металл на выбор',
-    image: ring48,
+    images: ['/rings_new/03._Зимний_лёд_123.webp', '/rings_new/03.1._Зимний_лёд_123.webp', '/rings_new/03.2._Зимний_лёд_123.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные'],
     specs: {
-      style: 'Шайба с двойной текстурой в белом золоте.',
-      female: { size: '16', width: '3 мм', },
+      style: 'Прямые обручальные кольца «шайбы» с фактурой «Зимний лёд» в белом золоте.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16', width: '4 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Полусфера матовая с фактурой "Грани"',
+    desc: 'Обручальное кольца полусфера с матовой ямчатой фактурой в белом золоте.',
+    price: 'от 60 000 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/20._Матовые_полусферы_Волна_123.webp', '/rings_new/20.1._Матовые_полусферы_Волна_123.webp', '/rings_new/20.2._Матовые_полусферы_Волна_123.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные'],
+    specs: {
+      style: 'Обручальное кольца полусфера с матовой ямчатой фактурой в белом золоте.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16', width: '4 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Прямая шайба с лунной фактурой',
+    desc: 'Прямая «шайба» с лунной фактурой в белом золоте.',
+    price: 'от 59 500 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/01._Лунные_шайбы_123.webp', '/rings_new/01.2._Лунные_шайбы_123.webp', '/rings_new/01.3._Лунные_шайбы_123.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные'],
+    specs: {
+      style: 'Прямая «шайба» с лунной фактурой в белом золоте.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '19', width: '5 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Глянцевая шайба с романтичной пропилом',
+    desc: 'Глянцевое обручальное кольцо с прорезью в белом золоте',
+    price: 'от 59 500 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/09._Глянцевые_шайбы_с_прорезью_123.webp', '/rings_new/09.1._Глянцевые_шайбы_с_прорезью_123.webp', '/rings_new/09.2._Глянцевые_шайбы_с_прорезью_123.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные'],
+    specs: {
+      style: 'Глянцевое обручальное кольцо с прорезью в белом золоте',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16', width: '3 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Прямая шайба с "Икс" узорами',
+    desc: 'Прямое обручальное кольцо с полосками в белом золоте.',
+    price: 'от 59 500 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/02._Шайбы_с_Х_ИКС_прорезями_123.webp', '/rings_new/02.1._Шайбы_с_Х_ИКС_прорезями_123.webp', '/rings_new/02.2._Шайбы_с_Х_ИКС_прорезями_123.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные'],
+    specs: {
+      style: 'Прямое обручальное кольцо с полосками в белом золоте.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '17', width: '3 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Прямая шайба с фаткурой "Лёд"',
+    desc: 'Прямые обручальные кольца «шайбы» с фактурой «Зимний лёд» в белом золоте.',
+    price: 'от 62 000 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/03._Зимний_лёд_123.webp', '/rings_new/03.1._Зимний_лёд_123.webp', '/rings_new/03.2._Зимний_лёд_123.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные'],
+    specs: {
+      style: 'Прямые обручальные кольца «шайбы» с фактурой «Зимний лёд» в белом золоте.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '17', width: '3,5 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Прямая шайба с "Икс" узорами',
+    desc: 'Прямая шайба из белого золота с ИКС-узоррами',
+    price: 'от 59 500 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/02._Шайбы_с_Х_ИКС_прорезями_123.webp', '/rings_new/02.1._Шайбы_с_Х_ИКС_прорезями_123.webp', '/rings_new/02.2._Шайбы_с_Х_ИКС_прорезями_123.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные'],
+    specs: {
+      style: 'Прямая шайба из белого золота с ИКС-узоррами',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '18', width: '4,5 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Прямая глянцевая шайба с бриллиантовой дорожкой в край',
+    desc: 'Комбинированное обручальное кольцо со вставками бриллиантов 0,15 ct. жёлтом золоте. *Происхождение бриллиантов на выбор',
+    price: 'от 79 000 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/04._Комбинированные_шайбы_125.webp', '/rings_new/04.1._Комбинированные_шайбы_125.webp', '/rings_new/04.3._Комбинированные_шайбы_125.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'С бриллиантами', 'Комбинированные'],
+    specs: {
+      style: 'Комбинированное обручальное кольцо со вставками бриллиантов 0,15 ct. жёлтом золоте. *Происхождение бриллиантов на выбор',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16', width: '3,5 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Комбинированная глянцевая шайба с золотой вставкой',
+    desc: 'Комбинированное обручальное кольцо со вставкой жёлтого золота.',
+    price: 'от 72 500 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/04._Комбинированные_шайбы_125.webp', '/rings_new/04.1._Комбинированные_шайбы_125.webp', '/rings_new/04.3._Комбинированные_шайбы_125.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Комбинированные'],
+    specs: {
+      style: 'Комбинированное обручальное кольцо со вставкой жёлтого золота.',
+      female: { size: '16', width: '3 мм' },
       male:   { size: '18', width: '5 мм' },
       metals: [
         { label: 'Серебро 925',            color: '#C7C9CE' },
@@ -1317,15 +1705,16 @@ const catalogItems = [
     }
   },
   {
-    title: 'Глянцевая шайба с боковой дорожкой',
-    desc: 'Глянцевая обручальная шайба с боковой дорожкой бриллиантов.',
-    price: 'от 116 000 ₽',
+    title: 'Прямая шайба "Фантазия"',
+    desc: 'Комбинированное кольцо из белого золота',
+    price: 'от 75 000 ₽',
     material: 'Металл на выбор',
-    image: ring49,
+    images: ['/rings_new/18._Двухцветные_шайбы_с_выемками_1245.webp', '/rings_new/18.1._Двухцветные_шайбы_с_выемками_1245.webp', '/rings_new/18.2._Двухцветные_шайбы_с_выемками_1245.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Комбинированные'],
     specs: {
-      style: 'Глянцевая шайба с боковой дорожкой в белом золоте.',
-      female: { size: '16', width: '3 мм', diamonds: 'Круг · 0,19 ct' },
+      style: 'Комбинированное кольцо из белого золота',
+      female: { size: '16', width: '3 мм' },
       male:   { size: '18', width: '5 мм' },
       metals: [
         { label: 'Серебро 925',            color: '#C7C9CE' },
@@ -1338,15 +1727,38 @@ const catalogItems = [
     }
   },
   {
-    title: 'Шайба с мелкой алмазной насечкой',
-    desc: 'Обручальная шайба с мелкой алмазной насечкой по всей поверхности.',
-    price: 'от 81 000 ₽',
+    title: 'Прямая шайба "Фантазия" с бриллиантовой россыпью',
+    desc: 'Комбинированное двухцветное кольцо с выемками и вставками бриллиантов открытой дорожкой 2 мм.',
+    price: 'от 89 000 ₽',
     material: 'Металл на выбор',
-    image: ring50,
+    images: ['/rings_new/18._Двухцветные_шайбы_с_выемками_1245.webp', '/rings_new/18.1._Двухцветные_шайбы_с_выемками_1245.webp', '/rings_new/18.2._Двухцветные_шайбы_с_выемками_1245.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'С бриллиантами', 'Комбинированные'],
     specs: {
-      style: 'Шайба с мелкой алмазной насечкой в белом золоте.',
-      female: { size: '16', width: '3 мм', },
+      style: 'Комбинированное двухцветное кольцо с выемками и вставками бриллиантов открытой дорожкой 2 мм.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16', width: '3 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Глянцевая шайба "Грани"',
+    desc: 'Обручальное кольцо с фактурой «Грани» в белом золоте.',
+    price: 'от 59 000 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/15._Шайбы_Грани_с_бриллиантами_124.webp', '/rings_new/15.1._Шайбы_Грани_с_бриллиантами_124.webp', '/rings_new/15.2._Шайбы_Грани_с_бриллиантами_124.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные'],
+    specs: {
+      style: 'Обручальное кольцо с фактурой «Грани» в белом золоте.',
+      female: { size: '16', width: '3 мм' },
       male:   { size: '18', width: '5 мм' },
       metals: [
         { label: 'Серебро 925',            color: '#C7C9CE' },
@@ -1359,16 +1771,215 @@ const catalogItems = [
     }
   },
   {
-    title: 'Двухцветная шайба с бриллиантами',
-    desc: 'Двухцветная обручальная шайба с дорожкой бриллиантов.',
+    title: 'Глянцевая шайба с фактурой "Грани" и бриллиантами',
+    desc: 'Обручальное кольцо с фактурой «Грани» и бриллиантами 1,25 мм в белом золоте.. Бриллианты 0,25 ct. *Происхождение бриллиантов на выбор',
+    price: 'от 68 000 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/15._Шайбы_Грани_с_бриллиантами_124.webp', '/rings_new/15.1._Шайбы_Грани_с_бриллиантами_124.webp', '/rings_new/15.2._Шайбы_Грани_с_бриллиантами_124.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные', 'С бриллиантами'],
+    specs: {
+      style: 'Обручальное кольцо с фактурой «Грани» и бриллиантами 1,25 мм в белом золоте.. Бриллианты 0,25 ct. *Происхождение бриллиантов на выбор',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16', width: '3 мм', diamonds: 'Круг · 0,25 ct' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Глянцевая шайба "Горы"',
+    desc: 'Обручальные кольцо «шайба» с фактурой «Горы» в белом золоте.',
+    price: 'от 59 500 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/05._Горные_шайбы_123.webp', '/rings_new/05.1._Горные_шайбы_123.webp', '/rings_new/05.2._Горные_шайбы_123.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные'],
+    specs: {
+      style: 'Обручальные кольцо «шайба» с фактурой «Горы» в белом золоте.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16', width: '3 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Лунная глянцевая шайба с бриллиантом',
+    desc: 'Прямое обручальное кольцо «шайбы» с глянцевой лунной фактурой в белом золоте и бриллиантом 0,012 ct. *Происхождение бриллиантов на выбор.',
+    price: 'от 69 500 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/13._Полусферы_Глянцевые_ямки_1234.webp', '/rings_new/13.1._Полусферы_Глянцевые_ямки_1234.webp', '/rings_new/13.2._Полусферы_Глянцевые_ямки_1234.webp'],
+    bestseller: false,
+    categories: ['Фактурные', 'С бриллиантами'],
+    specs: {
+      style: 'Прямое обручальное кольцо «шайбы» с глянцевой лунной фактурой в белом золоте и бриллиантом 0,012 ct. *Происхождение бриллиантов на выбор.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '18', width: '3,5 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Глянцевая шайба с фактурой "Волна"',
+    desc: 'Прямое глянцевое обручальное кольцо с продольной фактурой «Волна» в белом золоте.',
+    price: 'от 59 500 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/16._Шайбы_Волна_123.webp', '/rings_new/16.2._Шайбы_Волна_123.webp', '/rings_new/16.3._Шайбы_Волна_123.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные'],
+    specs: {
+      style: 'Прямое глянцевое обручальное кольцо с продольной фактурой «Волна» в белом золоте.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16', width: '3 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Матовая шайба с фактурой "Волна"',
+    desc: 'Прямое матовое обручальное кольцо с продольной фактурой «Волна» в белом золоте.',
+    price: 'от 62 500 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/16._Шайбы_Волна_123.webp', '/rings_new/16.2._Шайбы_Волна_123.webp', '/rings_new/16.3._Шайбы_Волна_123.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные'],
+    specs: {
+      style: 'Прямое матовое обручальное кольцо с продольной фактурой «Волна» в белом золоте.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '18', width: '5 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Матовая прямая шайба с бриллиантовой вставкой',
+    desc: 'Прямое обручальное кольцо «шайба» с матовой поверхностью в белом золоте и бриллиантом 0,012 ct. *Происхождение бриллиантов на выбор.',
+    price: 'от 68 500 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/10._Шайбы_Глянец_и_мат_с_бриллиантом_1234.webp', '/rings_new/10.1._Шайбы_Глянец_и_мат_с_бриллиантом_1234.webp', '/rings_new/10.2._Шайбы_Глянец_и_мат_с_бриллиантом_1234.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные', 'С бриллиантами'],
+    specs: {
+      style: 'Прямое обручальное кольцо «шайба» с матовой поверхностью в белом золоте и бриллиантом 0,012 ct. *Происхождение бриллиантов на выбор.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '18', width: '5 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Глянцевая прямая шайба с бриллиантовой вставкой',
+    desc: 'Прямое обручальное кольцо «шайба» с матовой поверхностью в белом золоте и бриллиантом 0,012 ct. *Происхождение бриллиантов на выбор.',
+    price: 'от 68 500 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/10._Шайбы_Глянец_и_мат_с_бриллиантом_1234.webp', '/rings_new/10.1._Шайбы_Глянец_и_мат_с_бриллиантом_1234.webp', '/rings_new/10.2._Шайбы_Глянец_и_мат_с_бриллиантом_1234.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные', 'С бриллиантами'],
+    specs: {
+      style: 'Прямое обручальное кольцо «шайба» с матовой поверхностью в белом золоте и бриллиантом 0,012 ct. *Происхождение бриллиантов на выбор.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16', width: '3 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Глянвая шаба "Бесконечность"',
+    desc: 'Обручальные кольца перекрут «Бесконечность» в белом золоте.',
+    price: 'от 59 500 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/11._Перекрут_Бесконечность_12.webp', '/rings_new/11.1._Перекрут_Бесконечность_12.webp', '/rings_new/11.2._Перекрут_Бесконечность_12.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца'],
+    specs: {
+      style: 'Обручальные кольца перекрут «Бесконечность» в белом золоте.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16', width: '2,5 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Глянцевая шайба с россыпью бриллиантов',
+    desc: 'Обручальное кольцо из желтого золото шириной АЖ 10 мм и бриллиантовой дорожкой в 0,3 ct.',
+    price: 'от 187 500₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/43._Глянцевая_шайба_с_россыпью_бриллиантов_14.webp', '/rings_new/43.1._Глянцевая_шайба_с_россыпью_бриллиантов_14.webp', '/rings_new/43.2._Глянцевая_шайба_с_россыпью_бриллиантов_14.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'С бриллиантами'],
+    specs: {
+      style: 'Обручальное кольцо из желтого золото шириной АЖ 10 мм и бриллиантовой дорожкой в 0,3 ct.',
+      female: { size: '16', width: '3 мм' },
+      male:   { size: '16', width: '10 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Изгибы глянцевые',
+    desc: 'Роскошные обручальные кольца «Изгибы» из белого и жёлтого золота. Созданы по 3D-модели.',
     price: 'от 120 000 ₽',
     material: 'Металл на выбор',
-    image: ring51,
+    images: ['/rings_new/44._Изгибы_1235.webp', '/rings_new/44.4._Изгибы_глянцевые_1235.webp', '/rings_new/44.1._Изгибы_глянцевые_1235.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Парные обручальные кольца', 'Фактурные', 'Комбинированные'],
     specs: {
-      style: 'Двухцветная шайба с бриллиантами в белом золоте.',
-      female: { size: '16', width: '3 мм', diamonds: 'Круг · 0,22 ct' },
-      male:   { size: '18', width: '5 мм' },
+      style: 'Роскошные обручальные кольца «Изгибы» из белого и жёлтого золота. Созданы по 3D-модели.',
+      female: { size: '15', width: '2,5 мм' },
+      male:   { size: '18', width: '3,5 мм' },
       metals: [
         { label: 'Серебро 925',            color: '#C7C9CE' },
         { label: 'Белое золото 585/750',   color: '#E4E6EA' },
@@ -1380,16 +1991,17 @@ const catalogItems = [
     }
   },
   {
-    title: 'Шайба с волнами и микро-бриллиантами',
-    desc: 'Обручальная шайба с волнообразной фактурой и микро-бриллиантами.',
-    price: 'от 128 000 ₽',
+    title: 'Изгибы глянцевые белые',
+    desc: 'Глянцевое обручальное кольцо с изгибами из белого золота. Создано по 3D-модели.',
+    price: 'от 60 000 ₽',
     material: 'Металл на выбор',
-    image: ring52,
+    images: ['/rings_new/44.6._Изгибы_глянцевые_1235.webp', '/rings_new/44.4._Изгибы_глянцевые_1235.webp', '/rings_new/44.5._Изгибы_глянцевые_1235.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные'],
     specs: {
-      style: 'Шайба с волнами и микро-бриллиантами в белом золоте.',
-      female: { size: '16', width: '3 мм', diamonds: 'Круг · 0,13 ct' },
-      male:   { size: '18', width: '5 мм' },
+      style: 'Глянцевое обручальное кольцо с изгибами из белого золота. Создано по 3D-модели.',
+      female: { size: '15', width: '2,5 мм' },
+      male:   { size: '18', width: '3,5 мм' },
       metals: [
         { label: 'Серебро 925',            color: '#C7C9CE' },
         { label: 'Белое золото 585/750',   color: '#E4E6EA' },
@@ -1401,16 +2013,83 @@ const catalogItems = [
     }
   },
   {
-    title: 'Матовая шайба с глянцевыми фасками',
-    desc: 'Матовая обручальная шайба с глянцевыми скошенными фасками.',
-    price: 'от 97 000 ₽',
+    title: 'Изгибы глянцевые жёлтые',
+    desc: 'Глянцевое обручальное кольцо с изгибами из жёлтого золота. Создано по 3D-модели.',
+    price: 'от 60 000 ₽',
     material: 'Металл на выбор',
-    image: ring53,
+    images: ['/rings_new/44.2._Изгибы_глянцевые_1235.webp', '/rings_new/44.1._Изгибы_глянцевые_1235.webp', '/rings_new/44.3._Изгибы_глянцевые_1235.webp'],
     bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные'],
     specs: {
-      style: 'Матовая шайба с глянцевыми фасками в белом золоте.',
-      female: { size: '16', width: '3 мм', },
-      male:   { size: '18', width: '5 мм' },
+      style: 'Глянцевое обручальное кольцо с изгибами из жёлтого золота. Создано по 3D-модели.',
+      female: { size: '15', width: '2,5 мм' },
+      male:   { size: '18', width: '3,5 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Шайба «Перламутр»',
+    desc: 'Яркое обручальное кольцо из белого золота с перламутровой фактурой.',
+    price: 'от 60 000 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/45._Шайба_Перламутр_13.webp', '/rings_new/45.2._Шайба_Перламутр_13.webp', '/rings_new/45.3._Шайба_Перламутр_13.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные'],
+    specs: {
+      style: 'Яркое обручальное кольцо из белого золота с перламутровой фактурой.',
+      female: { size: '17', width: '3,5 мм' },
+      male:   { size: '18', width: '4 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Шайба «Перламутр» с чёрной эмалью',
+    desc: 'Потрясающее обручальное кольцо из белого золота со вставкой чёрной эмали. Цвет эмали можно выбрать любой.',
+    price: 'от 70 000 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/46._Шайба_Перламутр_со_вставкой_черной_эмали_135.webp', '/rings_new/46.1._Шайба_Перламутр_со_вставкой_черной_эмали_135.webp', '/rings_new/46.3._Шайба_Перламутр_со_вставкой_черной_эмали_135.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные', 'Комбинированные'],
+    specs: {
+      style: 'Потрясающее обручальное кольцо из белого золота со вставкой чёрной эмали. Цвет эмали можно выбрать любой.',
+      female: { size: '18', width: '5 мм' },
+      male:   { size: '19', width: '5,5 мм' },
+      metals: [
+        { label: 'Серебро 925',            color: '#C7C9CE' },
+        { label: 'Белое золото 585/750',   color: '#E4E6EA' },
+        { label: 'Жёлтое золото 585/750',  color: '#E5C56A' },
+        { label: 'Красное золото 585/750', color: '#C8775A' },
+        { label: 'Розовое золото 585/750', color: '#E5B6A6' },
+        { label: 'Платина 950',            color: '#D6D8DC' }
+      ]
+    }
+  },
+  {
+    title: 'Полусферы «Тринити»',
+    desc: 'Глянцевые полусферы «Тринити» из белого, жёлтого и красного золота. Можно изготовить с любой фактурой на выбор.',
+    price: 'от 85 000 ₽',
+    material: 'Металл на выбор',
+    images: ['/rings_new/47._Полусферы_Тринити_135.webp', '/rings_new/47.1._Полусферы_Тринити_135.webp', '/rings_new/47.3._Полусферы_Тринити_135.webp'],
+    bestseller: false,
+    categories: ['Обручальные кольца', 'Фактурные', 'Комбинированные'],
+    specs: {
+      style: 'Глянцевые полусферы «Тринити» из белого, жёлтого и красного золота. Можно изготовить с любой фактурой на выбор.',
+      female: { size: '16', width: '2 мм' },
+      male:   { size: '17', width: '2,5 мм' },
       metals: [
         { label: 'Серебро 925',            color: '#C7C9CE' },
         { label: 'Белое золото 585/750',   color: '#E4E6EA' },
@@ -1791,6 +2470,149 @@ const catalogItems = [
   }
 }
 
+/* === Category filters === */
+.category-filter {
+  position: relative;
+  z-index: 50;
+  margin: 2rem 0 2.5rem;
+}
+
+.category-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.category-btn {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(222, 186, 78, 0.22);
+  border-radius: 999px;
+  padding: 0.55rem 1rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.category-btn:hover {
+  color: var(--color-gold-light);
+  border-color: rgba(222, 186, 78, 0.55);
+  background: rgba(222, 186, 78, 0.08);
+}
+
+.category-btn.active {
+  color: var(--color-gold-light);
+  background: rgba(222, 186, 78, 0.14);
+  border-color: rgba(222, 186, 78, 0.65);
+}
+
+/* Mobile category menu */
+.category-mobile {
+  display: none;
+  position: relative;
+  width: 100%;
+}
+
+.category-burger {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  padding: 0.8rem 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(222, 186, 78, 0.22);
+  border-radius: 8px;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.burger-line {
+  width: 18px;
+  height: 1.5px;
+  background: var(--color-gold-light);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.burger-label {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text);
+}
+
+.category-mobile-menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.6rem;
+  background: rgba(12, 10, 8, 0.78);
+  border: 1px solid rgba(222, 186, 78, 0.28);
+  border-radius: 10px;
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  box-shadow:
+    0 1px 0 0 rgba(255, 255, 255, 0.04) inset,
+    0 20px 50px -15px rgba(0, 0, 0, 0.8);
+}
+
+.category-mobile-item {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-align: left;
+  color: var(--color-text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 0.7rem 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.category-mobile-item:hover,
+.category-mobile-item.active {
+  color: var(--color-gold-light);
+  background: rgba(222, 186, 78, 0.12);
+}
+
+/* Category menu transition */
+.category-menu-enter-active,
+.category-menu-leave-active {
+  transition: all 0.25s ease;
+}
+
+.category-menu-enter-from,
+.category-menu-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+@media (max-width: 900px) {
+  .category-list {
+    display: none;
+  }
+
+  .category-mobile {
+    display: block;
+    padding: 0 0.5rem;
+  }
+}
+
 .show-more-wrap {
   display: flex;
   justify-content: center;
@@ -2016,6 +2838,76 @@ const catalogItems = [
   align-items: center;
   gap: 0.5rem;
   z-index: 5;
+}
+
+/* Image slider controls */
+.slider-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 1px solid rgba(222, 186, 78, 0.35);
+  background: rgba(8, 6, 4, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--color-gold-light);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+  z-index: 6;
+}
+
+.slider-arrow:hover {
+  background: rgba(222, 186, 78, 0.18);
+  border-color: rgba(222, 186, 78, 0.7);
+}
+
+.slider-arrow-prev {
+  left: 1rem;
+}
+
+.slider-arrow-next {
+  right: 1rem;
+}
+
+.slider-dots {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(8, 6, 4, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(222, 186, 78, 0.2);
+  z-index: 6;
+}
+
+.slider-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  padding: 0;
+}
+
+.slider-dot.active {
+  background: var(--color-gold-light);
+  transform: scale(1.15);
+}
+
+.slider-dot:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.65);
 }
 
 /* Info side */
@@ -2373,6 +3265,19 @@ const catalogItems = [
     width: 100%;
     aspect-ratio: 1/1;
     flex-shrink: 0;
+  }
+
+  .slider-arrow {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .slider-arrow-prev {
+    left: 0.6rem;
+  }
+
+  .slider-arrow-next {
+    right: 0.6rem;
   }
 
   .modal-info {

@@ -58,3 +58,6 @@ venv/
 # Backup / raw assets not used in production build
 .clients-backup/
 rings\ 2/
+
+# Temporary Python environment for scripts
+.tmp_venv/
