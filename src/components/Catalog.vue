@@ -62,7 +62,7 @@
           @mouseleave="resetTilt"
         >
           <div class="catalog-card-inner">
-            <div class="catalog-img">
+            <div class="catalog-img" @click="openModal(item)">
               <div v-if="item.bestseller" class="bestseller-badge">
                 <span class="badge-dot"></span>
                 Выбор мастеров
@@ -76,7 +76,7 @@
                 height="2048"
               >
               <div class="overlay">
-                <a href="#" class="overlay-btn" @click.prevent="openModal(item)">
+                <a href="#" class="overlay-btn" @click.stop.prevent="openModal(item)">
                   <span>Подробнее</span>
                   <svg class="overlay-btn-arrow" width="14" height="14" viewBox="0 0 14 14" fill="none">
                     <path d="M1 7H13M13 7L7 1M13 7L7 13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
@@ -120,7 +120,7 @@
               </svg>
             </button>
 
-            <div class="modal-image-wrapper">
+            <div class="modal-image-wrapper" @touchstart="onTouchStart" @touchend="onTouchEnd">
               <div v-if="selectedProduct.bestseller" class="modal-bestseller">
                 <span class="badge-dot"></span>
                 Выбор мастеров
@@ -313,6 +313,28 @@ const nextImage = () => {
 const prevImage = () => {
   if (!selectedProduct.value) return
   currentImage.value = (currentImage.value - 1 + selectedProduct.value.images.length) % selectedProduct.value.images.length
+}
+
+// === Touch swipe to switch images in modal ===
+let touchStartX = 0
+let touchEndX = 0
+
+const onTouchStart = (e) => {
+  touchStartX = e.changedTouches[0].screenX
+}
+
+const onTouchEnd = (e) => {
+  touchEndX = e.changedTouches[0].screenX
+  handleSwipe()
+}
+
+const handleSwipe = () => {
+  const threshold = 50
+  if (touchStartX - touchEndX > threshold) {
+    nextImage()
+  } else if (touchEndX - touchStartX > threshold) {
+    prevImage()
+  }
 }
 
 const goToBooking = async () => {
@@ -3259,40 +3281,55 @@ const catalogItems = [
 
 /* Mobile responsiveness */
 @media (max-width: 900px) {
+  .modal-overlay {
+    padding: 0;
+    align-items: flex-start;
+  }
+
   .modal-content {
     display: flex;
     flex-direction: column;
-    padding: 2rem;
-    gap: 2rem;
-    border-radius: 4px;
+    padding: 0;
+    gap: 0;
+    border-radius: 0;
+    max-width: 100%;
+    max-height: 100vh;
   }
 
   .modal-image-wrapper {
     width: 100%;
-    aspect-ratio: 1/1;
+    aspect-ratio: 3/4;
+    max-height: 75vh;
     flex-shrink: 0;
+    border-radius: 0;
   }
 
   .slider-arrow {
-    width: 2rem;
-    height: 2rem;
+    width: 2.25rem;
+    height: 2.25rem;
   }
 
   .slider-arrow-prev {
-    left: 0.6rem;
+    left: 0.5rem;
   }
 
   .slider-arrow-next {
-    right: 0.6rem;
+    right: 0.5rem;
   }
 
   .modal-info {
     flex-shrink: 0;
     min-width: 0;
+    padding: 1.5rem 1rem;
   }
 
   .modal-title {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
+  }
+
+  .modal-desc {
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
   }
 
   .modal-features {
@@ -3308,6 +3345,26 @@ const catalogItems = [
 
   .modal-cta {
     justify-content: center;
+  }
+
+  .modal-close {
+    top: 0.75rem;
+    right: 0.75rem;
+    background: rgba(8, 6, 4, 0.45);
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-info {
+    padding: 1.25rem 0.75rem;
+  }
+
+  .modal-title {
+    font-size: 1.35rem;
+  }
+
+  .modal-price {
+    font-size: 1.5rem;
   }
 }
 </style>
