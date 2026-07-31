@@ -91,7 +91,6 @@
                 <span class="catalog-material">{{ item.material }}</span>
               </div>
               <h4 class="product-title heading-font">{{ item.title }}</h4>
-              <p class="product-desc font-light">{{ item.desc }}</p>
               <div class="catalog-divider"></div>
               <div class="product-price heading-font">
                 <span class="price-from">от</span>
@@ -2124,6 +2123,7 @@ const catalogItems = [
 .catalog-card-inner {
   display: flex;
   flex-direction: column;
+  flex: 1;
   transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
   -webkit-transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
   transform-style: preserve-3d;
@@ -2284,7 +2284,7 @@ const catalogItems = [
   display: flex;
   flex-direction: column;
   padding: 0 0.25rem;
-  flex-shrink: 0;
+  flex: 1;
   min-width: 0;
 }
 
@@ -2339,6 +2339,7 @@ const catalogItems = [
 .catalog-divider {
   height: 1px;
   background: linear-gradient(to right, rgba(222, 186, 78, 0.3), transparent);
+  margin-top: auto;
   margin-bottom: 1rem;
 }
 
@@ -2398,6 +2399,10 @@ const catalogItems = [
   .catalog-meta,
   .catalog-divider {
     display: none;
+  }
+
+  .catalog-card :deep(.product-price) {
+    margin-top: auto;
   }
 }
 
