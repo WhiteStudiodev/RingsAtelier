@@ -97,20 +97,8 @@ a {
     text-transform: uppercase;
 }
 
-.tracking-wider {
-    letter-spacing: 0.1em;
-}
-
 .tracking-widest {
     letter-spacing: 0.3em;
-}
-
-.text-sm {
-    font-size: 0.875rem;
-}
-
-.text-lg {
-    font-size: 1.125rem;
 }
 
 .font-light {
@@ -291,16 +279,6 @@ header {
 
 .hero-image-card:hover img {
     transform: scale(1.05);
-}
-
-.floating-label {
-    position: absolute;
-    bottom: 2rem;
-    left: -2rem;
-    padding: 1rem 1.5rem;
-    border-radius: 1rem;
-    z-index: 5;
-    background: rgba(2, 44, 34, 0.6);
 }
 
 section {
@@ -824,28 +802,6 @@ section {
     color: var(--color-bg);
 }
 
-.material-tag {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: rgba(2, 44, 34, 0.8);
-    backdrop-filter: blur(4px);
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--color-text);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: opacity 0.4s ease, visibility 0.4s ease;
-    z-index: 10;
-}
-
-.catalog-card:hover .material-tag {
-    opacity: 0;
-    visibility: hidden;
-}
-
 .bestseller-badge {
     position: absolute;
     bottom: 1rem;
@@ -879,12 +835,6 @@ section {
 .product-title {
     font-size: 1.5rem;
     margin-bottom: 0.5rem;
-}
-
-.product-desc {
-    font-size: 0.875rem;
-    color: var(--color-text-muted);
-    margin-bottom: 1rem;
 }
 
 .product-price {

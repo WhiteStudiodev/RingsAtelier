@@ -4,7 +4,7 @@
       <div class="footer-grid">
         <div class="footer-brand">
           <a href="#" class="logo logo-with-icon heading-font uppercase">
-            <img :src="logoSrc" alt="Rings Atelier" class="logo-img">
+            <img :src="logoSrc" alt="Rings Atelier" class="logo-img" width="512" height="512">
             <span>Rings Atelier</span>
           </a>
           <p class="footer-desc font-light">Rings Atelier — ювелирная мастерская в Санкт-Петербурге. Премиальные мастер-классы по созданию обручальных колец, помолвочных колец и украшений на заказ в самом сердце города.</p>

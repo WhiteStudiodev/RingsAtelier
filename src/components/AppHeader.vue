@@ -1,7 +1,7 @@
 <template>
   <header class="glass-panel">
     <RouterLink to="/" class="logo logo-with-icon heading-font uppercase">
-      <img :src="logoSrc" alt="Rings Atelier" class="logo-img">
+      <img :src="logoSrc" alt="Rings Atelier" class="logo-img" width="512" height="512">
       <span>Rings Atelier</span>
     </RouterLink>
     <nav class="nav-links">
