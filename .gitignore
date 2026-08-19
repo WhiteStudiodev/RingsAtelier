@@ -50,6 +50,7 @@ swag/nginx/proxy-confs/*
 # Python backend
 backend/.env
 backend/*.db
+backend/backups/
 __pycache__/
 *.py[cod]
 .venv/

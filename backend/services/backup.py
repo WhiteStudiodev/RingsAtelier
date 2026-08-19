@@ -6,7 +6,7 @@ from pathlib import Path
 from loguru import logger
 
 from config import settings
-from services.telegram import send_telegram_message
+from services.telegram import send_telegram_document, send_telegram_message
 
 
 def get_db_file_path() -> Path | None:
@@ -72,20 +72,20 @@ async def send_backup_notification(backup_path: Path | None, success: bool) -> N
     if success and backup_path:
         size_bytes = backup_path.stat().st_size
         size_text = _humanize_size(size_bytes)
-        text = (
+        caption = (
             f"<b>✅ Бэкап БД Rings Atelier</b>\n\n"
             f"Файл: <code>{backup_path.name}</code>\n"
             f"Размер: {size_text}\n"
             f"Время: {now_str} UTC"
         )
+        await send_telegram_document(settings.backup_chat_id, backup_path, caption)
     else:
         text = (
             f"<b>❌ Бэкап БД Rings Atelier не удался</b>\n\n"
             f"Время: {now_str} UTC\n"
             f"Проверьте логи сервера."
         )
-
-    await send_telegram_message(settings.backup_chat_id, text)
+        await send_telegram_message(settings.backup_chat_id, text)
 
 
 def _humanize_size(size_bytes: int) -> str:
