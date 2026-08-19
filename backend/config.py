@@ -18,6 +18,15 @@ class Settings(BaseSettings):
     # socks5://user:password@host:port
     proxy_url: str | None = None
 
+    # Telegram chat ID for daily DB backup notifications.
+    # If empty, backup messages are not sent.
+    backup_chat_id: str | None = None
+
+    # Backup schedule and retention.
+    backup_time_utc: str = "05:00"
+    backup_retention_days: int = 7
+    backup_dir: str = "./backups"
+
     # SMTP settings for email notifications (Yandex: smtp.yandex.ru:465)
     smtp_host: str = "smtp.yandex.ru"
     smtp_port: int = 465

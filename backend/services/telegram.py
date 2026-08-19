@@ -31,22 +31,22 @@ def format_lead_message(lead: Lead) -> str:
     return "\n".join(lines)
 
 
-async def send_lead_notification(lead: Lead) -> bool:
-    if not settings.bot_token or not settings.chat_id:
+async def send_telegram_message(chat_id: str, text: str) -> bool:
+    """Send an HTML message to a Telegram chat."""
+    if not settings.bot_token or not chat_id:
         logger.warning("Telegram bot_token or chat_id is not configured")
         return False
 
-    text = format_lead_message(lead)
     base_url = settings.telegram_api_url.rstrip("/")
     url = f"{base_url}/bot{settings.bot_token}/sendMessage"
 
     payload = {
-        "chat_id": settings.chat_id,
+        "chat_id": chat_id,
         "text": text,
         "parse_mode": "HTML",
     }
 
-    logger.debug("Sending Telegram notification to {}", base_url)
+    logger.debug("Sending Telegram message to {}", base_url)
 
     try:
         connector = None
@@ -64,8 +64,17 @@ async def send_lead_notification(lead: Lead) -> bool:
                 if not data.get("ok", False):
                     logger.error("Telegram API returned error: {}", data)
                     return False
-                logger.info("Telegram notification sent successfully")
+                logger.info("Telegram message sent successfully")
                 return True
     except Exception:
         logger.exception("Telegram send error")
         return False
+
+
+async def send_lead_notification(lead: Lead) -> bool:
+    if not settings.bot_token or not settings.chat_id:
+        logger.warning("Telegram bot_token or chat_id is not configured")
+        return False
+
+    text = format_lead_message(lead)
+    return await send_telegram_message(settings.chat_id, text)

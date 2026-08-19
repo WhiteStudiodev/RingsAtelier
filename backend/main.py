@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Depends, HTTPException
@@ -7,6 +8,7 @@ from sqlalchemy.orm import Session
 from config import settings
 from database import create_tables, get_db, Lead
 from schemas import LeadCreate, LeadOut
+from services.backup import backup_scheduler
 from services.email import send_lead_email
 from services.telegram import send_lead_notification
 
@@ -14,6 +16,7 @@ from services.telegram import send_lead_notification
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     create_tables()
+    asyncio.create_task(backup_scheduler())
     yield
 
 
