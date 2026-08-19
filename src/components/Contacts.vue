@@ -261,7 +261,10 @@ const handleSubmit = async () => {
       submitted.value = false
     }, 5000)
   } catch (error) {
-    showToast(error.message || 'Не удалось отправить заявку. Попробуйте ещё раз.', 'error')
+    showToast(
+      'Произошла техническая ошибка. Попробуйте снова через несколько минут или свяжитесь с нами в любом мессенджере.',
+      'error',
+    )
   } finally {
     isSubmitting.value = false
   }
