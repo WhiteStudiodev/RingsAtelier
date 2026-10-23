@@ -13,7 +13,7 @@ const routes = [
     component: HomePage
   },
   {
-    path: '/catalog',
+    path: '/catalog/:sku?',
     name: 'Catalog',
     component: CatalogPage
   },

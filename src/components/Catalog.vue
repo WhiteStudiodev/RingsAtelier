@@ -93,8 +93,8 @@
               <h4 class="product-title heading-font">{{ item.title }}</h4>
               <div class="catalog-divider"></div>
               <div class="product-price heading-font">
-                <span class="price-from">от</span>
-                {{ item.price }}
+                <template v-if="item.price"><span class="price-from">от</span>{{ item.price }}</template>
+                <template v-else>Цена по запросу</template>
               </div>
             </div>
           </div>
@@ -174,7 +174,7 @@
             <div class="modal-info">
               <div class="modal-meta">
                 <span class="modal-material">{{ selectedProduct.material }}</span>
-                <span class="modal-collection">Работа с мастер-класса</span>
+                <span class="modal-collection">{{ collectionLabel(selectedProduct) }}</span>
               </div>
 
               <h3 class="modal-title heading-font">{{ selectedProduct.title }}</h3>
@@ -183,77 +183,110 @@
 
               <p class="modal-desc body-font font-light">{{ selectedProduct.specs.style }}</p>
 
-              <!-- Таб Она / Он -->
-              <div class="spec-tabs" role="tablist">
-                <button
-                  type="button"
-                  role="tab"
-                  :aria-selected="activeSpecTab === 'female'"
-                  :class="['spec-tab', { active: activeSpecTab === 'female' }]"
-                  @click="activeSpecTab = 'female'"
-                >Она</button>
-                <button
-                  type="button"
-                  role="tab"
-                  :aria-selected="activeSpecTab === 'male'"
-                  :class="['spec-tab', { active: activeSpecTab === 'male' }]"
-                  @click="activeSpecTab = 'male'"
-                >Он</button>
-              </div>
-
-              <!-- Таблица характеристик -->
-              <dl class="spec-table">
-                <template v-if="activeSpecTab === 'female'">
-                  <div class="spec-row">
-                    <dt>Размер</dt><dd>{{ selectedProduct.specs.female.size }}</dd>
-                  </div>
-                  <div class="spec-row">
-                    <dt>Ширина</dt><dd>{{ selectedProduct.specs.female.width }}</dd>
-                  </div>
-                  <div v-if="selectedProduct.specs.female.diamonds" class="spec-row">
-                    <dt>Бриллианты</dt><dd>{{ selectedProduct.specs.female.diamonds }}</dd>
-                  </div>
-                </template>
-                <template v-else>
-                  <div class="spec-row">
-                    <dt>Размер</dt><dd>{{ selectedProduct.specs.male.size }}</dd>
-                  </div>
-                  <div class="spec-row">
-                    <dt>Ширина</dt><dd>{{ selectedProduct.specs.male.width }}</dd>
-                  </div>
-                </template>
-              </dl>
-
-              <!-- Палитра доступных металлов -->
-              <div class="metals-block">
-                <div class="metals-label">Доступные металлы</div>
-                <div class="metals-row">
-                  <span
-                    v-for="m in selectedProduct.specs.metals"
-                    :key="m.label"
-                    class="metal-dot"
-                    :style="{ background: m.color }"
-                    :title="m.label"
-                    :aria-label="m.label"
-                  ></span>
+              <!-- Ring specs -->
+              <template v-if="!selectedProduct.type">
+                <!-- Таб Она / Он -->
+                <div class="spec-tabs" role="tablist">
+                  <button
+                    type="button"
+                    role="tab"
+                    :aria-selected="activeSpecTab === 'female'"
+                    :class="['spec-tab', { active: activeSpecTab === 'female' }]"
+                    @click="activeSpecTab = 'female'"
+                  >Она</button>
+                  <button
+                    type="button"
+                    role="tab"
+                    :aria-selected="activeSpecTab === 'male'"
+                    :class="['spec-tab', { active: activeSpecTab === 'male' }]"
+                    @click="activeSpecTab = 'male'"
+                  >Он</button>
                 </div>
-                <div class="metals-legend">
-                  <span v-for="(m, i) in selectedProduct.specs.metals" :key="m.label">
-                    {{ m.label }}<span v-if="i < selectedProduct.specs.metals.length - 1"> · </span>
-                  </span>
+
+                <!-- Таблица характеристик -->
+                <dl class="spec-table">
+                  <template v-if="activeSpecTab === 'female'">
+                    <div class="spec-row">
+                      <dt>Размер</dt><dd>{{ selectedProduct.specs.female.size }}</dd>
+                    </div>
+                    <div class="spec-row">
+                      <dt>Ширина</dt><dd>{{ selectedProduct.specs.female.width }}</dd>
+                    </div>
+                    <div v-if="selectedProduct.specs.female.diamonds" class="spec-row">
+                      <dt>Бриллианты</dt><dd>{{ selectedProduct.specs.female.diamonds }}</dd>
+                    </div>
+                  </template>
+                  <template v-else>
+                    <div class="spec-row">
+                      <dt>Размер</dt><dd>{{ selectedProduct.specs.male.size }}</dd>
+                    </div>
+                    <div class="spec-row">
+                      <dt>Ширина</dt><dd>{{ selectedProduct.specs.male.width }}</dd>
+                    </div>
+                  </template>
+                </dl>
+
+                <!-- Палитра доступных металлов -->
+                <div class="metals-block">
+                  <div class="metals-label">Доступные металлы</div>
+                  <div class="metals-row">
+                    <span
+                      v-for="m in selectedProduct.specs.metals"
+                      :key="m.label"
+                      class="metal-dot"
+                      :style="{ background: m.color }"
+                      :title="m.label"
+                      :aria-label="m.label"
+                    ></span>
+                  </div>
+                  <div class="metals-legend">
+                    <span v-for="(m, i) in selectedProduct.specs.metals" :key="m.label">
+                      {{ m.label }}<span v-if="i < selectedProduct.specs.metals.length - 1"> · </span>
+                    </span>
+                  </div>
                 </div>
-              </div>
+              </template>
+
+              <!-- Engagement ring specs -->
+              <template v-else-if="selectedProduct.type === 'engagement'">
+                <dl class="spec-table">
+                  <div v-for="spec in selectedProduct.specs.engagement" :key="spec.label" class="spec-row">
+                    <dt>{{ spec.label }}</dt><dd>{{ spec.value }}</dd>
+                  </div>
+                </dl>
+              </template>
+
+              <!-- Diamond specs -->
+              <template v-else>
+                <dl class="spec-table diamond-spec-table">
+                  <div v-for="spec in selectedProduct.specs.gia" :key="spec.label" class="spec-row">
+                    <dt>{{ spec.label }}</dt>
+                    <dd>{{ spec.value }}</dd>
+                  </div>
+                </dl>
+              </template>
 
               <div class="modal-divider"></div>
 
               <div class="modal-footer">
                 <div class="modal-price-block">
-                  <span class="modal-price">{{ selectedProduct.price }}</span>
-                  <span class="modal-price-note">за пару · с материалами</span>
+                  <span class="modal-price" :class="{ 'modal-price-request': selectedProduct.type === 'engagement' }">{{ selectedProduct.type === 'engagement' ? 'Цена по запросу' : selectedProduct.price }}</span>
+                  <span class="modal-price-note">{{ priceNote(selectedProduct) }}</span>
                 </div>
 
-                <a href="#contact" class="modal-cta" @click.prevent="goToBooking">
-                  <span>Записаться на мастер-класс</span>
+                <div v-if="selectedProduct.type === 'engagement'" class="modal-cta-group">
+                  <a href="#contact" class="modal-cta secondary" @click.prevent="goToBooking">
+                    <span>Запросить цену</span>
+                  </a>
+                  <a href="#contact" class="modal-cta" @click.prevent="goToBooking">
+                    <span>Назначить встречу</span>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <path d="M1 8H15M15 8L8 1M15 8L8 15" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                    </svg>
+                  </a>
+                </div>
+                <a v-else href="#contact" class="modal-cta" @click.prevent="goToBooking">
+                  <span>{{ selectedProduct.type === 'diamond' ? 'Узнать цену / Заказать' : 'Записаться на мастер-класс' }}</span>
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path d="M1 8H15M15 8L8 1M15 8L8 15" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
                   </svg>
@@ -269,9 +302,10 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
+const route = useRoute()
 const selectedProduct = ref(null)
 const activeSpecTab = ref('female')
 const currentImage = ref(0)
@@ -287,22 +321,30 @@ const categories = [
   'С бриллиантами',
   'Комбинированные',
   'Помолвочные кольца'
+  // 'Бриллианты' — вкладка временно скрыта, данные карточек ниже в catalogItems
 ]
 
 watch(selectedCategory, () => {
   visibleCount.value = VISIBLE_STEP
 })
 
-const openModal = (item) => {
+const openModal = (item, fromUrl = false) => {
   selectedProduct.value = item
   activeSpecTab.value = 'female'
   document.body.style.overflow = 'hidden'
+  // Артикул живёт только в ссылке: /catalog/RA0101
+  if (!fromUrl && item.sku && route.name === 'Catalog') {
+    router.replace(`/catalog/${item.sku}`)
+  }
 }
 
 const closeModal = () => {
   selectedProduct.value = null
   currentImage.value = 0
   document.body.style.overflow = ''
+  if (route.params.sku) {
+    router.replace('/catalog')
+  }
 }
 
 const nextImage = () => {
@@ -384,6 +426,7 @@ const resetTilt = (e) => {
 
 const catalogItems = [
   {
+    sku: 'RA0101',
     title: 'Лунные шайбы',
     price: 'от 119 000 ₽',
     material: 'Металл на выбор',
@@ -405,6 +448,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0102',
     title: 'Шайбы с Х (ИКС) прорезями',
     price: 'от 136 800 ₽',
     material: 'Металл на выбор',
@@ -426,6 +470,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0103',
     title: 'Зимний лёд',
     price: 'от 124 500 ₽',
     material: 'Металл на выбор',
@@ -447,6 +492,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0104',
     title: 'Комбинированные шайбы',
     price: 'от 135 900 ₽',
     material: 'Металл на выбор',
@@ -468,6 +514,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0105',
     title: 'Горные шайбы',
     price: 'от 129 500 ₽',
     material: 'Металл на выбор',
@@ -489,6 +536,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0106',
     title: 'Прямые шайбы с ямчатой фактурой',
     price: 'от 121 000 ₽',
     material: 'Металл на выбор',
@@ -510,6 +558,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0107',
     title: 'Сатиново-алмазные шайбы',
     price: 'от 126 500 ₽',
     material: 'Металл на выбор',
@@ -531,6 +580,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0108',
     title: 'Шайбы «Полоски»',
     price: 'от 123 400 ₽',
     material: 'Металл на выбор',
@@ -552,6 +602,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0109',
     title: 'Глянцевые шайбы с прорезью',
     price: 'от 125 500 ₽',
     material: 'Металл на выбор',
@@ -573,6 +624,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0110',
     title: 'Шайбы «Глянец и мат» с бриллиантом',
     price: 'от 137 000 ₽',
     material: 'Металл на выбор',
@@ -594,6 +646,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0111',
     title: 'Изгибы глянцевые',
     price: 'от 120 000 ₽',
     material: 'Металл на выбор',
@@ -615,6 +668,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0112',
     title: 'Перекрут «Бесконечность»',
     price: 'от 122 500 ₽',
     material: 'Металл на выбор',
@@ -636,6 +690,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0113',
     title: 'Перекрут «Бесконечность» с бриллиантами',
     price: 'от 138 500 ₽',
     material: 'Металл на выбор',
@@ -657,6 +712,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0114',
     title: 'Полусферы «Глянцевые ямки»',
     price: 'от 137 000 ₽',
     material: 'Металл на выбор',
@@ -678,6 +734,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0115',
     title: 'Комфортные шайбы с бриллиантами',
     price: 'от 135 900 ₽',
     material: 'Металл на выбор',
@@ -699,6 +756,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0116',
     title: 'Шайбы «Грани» с бриллиантами',
     price: 'от 127 800 ₽',
     material: 'Металл на выбор',
@@ -720,6 +778,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0117',
     title: 'Шайбы «Волна»',
     price: 'от 122 500 ₽',
     material: 'Металл на выбор',
@@ -741,6 +800,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0118',
     title: 'Двухцветные шайбы с бриллиантами',
     price: 'от 141 500 ₽',
     material: 'Металл на выбор',
@@ -762,6 +822,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0119',
     title: 'Двухцветные шайбы с выемками',
     price: 'от 139 950 ₽',
     material: 'Металл на выбор',
@@ -783,6 +844,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0120',
     title: 'Глянцевые шайбы с узором и бриллиантами',
     price: 'от 141 000 ₽',
     material: 'Металл на выбор',
@@ -804,6 +866,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0121',
     title: 'Матовые полусферы «Волна»',
     price: 'от 125 600 ₽',
     material: 'Металл на выбор',
@@ -825,6 +888,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0122',
     title: 'Гладкие шайбы с фасками и бриллиантами',
     price: 'от 131 000 ₽',
     material: 'Металл на выбор',
@@ -846,6 +910,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0123',
     title: 'Полусферы из желтого золота',
     price: 'от 110 000 ₽',
     material: 'Металл на выбор',
@@ -867,6 +932,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0124',
     title: 'Полусферы из белого золота',
     price: 'от 110 000 ₽',
     material: 'Металл на выбор',
@@ -888,6 +954,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0125',
     title: 'Матовые полусферы',
     price: 'от 110 000 ₽',
     material: 'Металл на выбор',
@@ -909,6 +976,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0126',
     title: 'Кольцо с фактурой "Барханы"',
     price: 'от 50 000 ₽',
     material: 'Металл на выбор',
@@ -930,6 +998,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0127',
     title: 'Кольцо с бриллиантовой дорожкой',
     price: 'от 70 000 ₽',
     material: 'Металл на выбор',
@@ -951,6 +1020,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0128',
     title: 'Кольцо с россыпью бриллиантов и выемкой',
     price: 'от 73 000 ₽ .',
     material: 'Металл на выбор',
@@ -972,6 +1042,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0129',
     title: 'Полусфера поперечное "Дерево"',
     price: 'от 50 000 ₽',
     material: 'Металл на выбор',
@@ -993,6 +1064,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0130',
     title: 'Кольцо "Половинка"',
     price: 'от 50 000 ₽',
     material: 'Металл на выбор',
@@ -1014,6 +1086,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0131',
     title: 'Шайба поперечное "Дерево"',
     price: 'от 50 000 ₽',
     material: 'Металл на выбор',
@@ -1035,6 +1108,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0132',
     title: 'Шайба с фактурой "Волна"',
     price: 'от 50 000 ₽',
     material: 'Металл на выбор',
@@ -1056,6 +1130,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0133',
     title: 'Бриллиантовая дорожка в 1/3 кольца',
     price: 'от 71 000 ₽ .',
     material: 'Металл на выбор',
@@ -1077,6 +1152,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0134',
     title: 'Россыпь бриллиантов в 1/4 кольца',
     price: 'от 73 000 ₽ .',
     material: 'Металл на выбор',
@@ -1098,6 +1174,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0135',
     title: 'Дорожка закрытая в 1/2 кольца',
     price: 'от 75 000 ₽',
     material: 'Металл на выбор',
@@ -1119,6 +1196,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0136',
     title: 'Открытая дорожка из бриллиантов изумрудного цвета',
     price: 'от 73 500 ₽',
     material: 'Металл на выбор',
@@ -1140,6 +1218,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0137',
     title: 'Открытая россыпь бриллиантов в 1/4 кольца',
     price: 'от 75 000 ₽',
     material: 'Металл на выбор',
@@ -1161,6 +1240,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0138',
     title: 'Отпечаток пальчика внутри кольца',
     price: 'от 55 000 ₽',
     material: 'Металл на выбор',
@@ -1182,6 +1262,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0139',
     title: 'Бриллиантовая россыпь в половину колечка',
     price: 'от 73 000 ₽',
     material: 'Металл на выбор',
@@ -1203,6 +1284,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0140',
     title: 'Матовое кольцо с волной',
     price: 'от 50 000 ₽',
     material: 'Металл на выбор',
@@ -1224,6 +1306,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0141',
     title: 'Глянцевая шайба с бриллиантами 3х3',
     price: 'от 77 000 ₽',
     material: 'Металл на выбор',
@@ -1245,6 +1328,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0142',
     title: 'Полусфера с роскошной россыпью камней',
     price: 'от 79 000 ₽',
     material: 'Металл на выбор',
@@ -1266,6 +1350,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0143',
     title: '42. Шайба с хаотичной матовкой',
     price: 'от 51 000 ₽',
     material: 'Металл на выбор',
@@ -1287,6 +1372,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0144',
     title: 'Прямая матовая шайба с ямчатой фактурой',
     price: 'от 59 500 ₽',
     material: 'Металл на выбор',
@@ -1308,6 +1394,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0145',
     title: 'Глянцевая шайба с фасками и бриллиантами',
     price: 'от 78 500₽',
     material: 'Металл на выбор',
@@ -1329,6 +1416,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0146',
     title: 'Прямая глянцевая шайба с узором и бриллиантми',
     price: 'от 72 000 ₽',
     material: 'Металл на выбор',
@@ -1350,6 +1438,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0147',
     title: 'Прямая глянцевая шайба с узором и бриллиантми',
     price: 'от 73 000 ₽',
     material: 'Металл на выбор',
@@ -1371,6 +1460,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0148',
     title: 'Комбинированная матовая и глянцевая шайба со вставками бриллиантов',
     price: 'от 80 000 ₽',
     material: 'Металл на выбор',
@@ -1392,6 +1482,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0149',
     title: 'Комбинированная матовая и глянцевая шайба со вставками черных бриллиантов',
     price: 'от 80 000 ₽',
     material: 'Металл на выбор',
@@ -1413,6 +1504,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0150',
     title: 'Прямая матовая шайба с фасками и узором',
     price: 'от 59 500 ₽',
     material: 'Металл на выбор',
@@ -1434,6 +1526,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0151',
     title: 'Прямая глянцевая шайба с узором и бриллиантми',
     price: 'от 75 500 ₽',
     material: 'Металл на выбор',
@@ -1455,6 +1548,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0152',
     title: 'Прямая шайба с сатиновой матовкой',
     price: 'от 58 900 ₽',
     material: 'Металл на выбор',
@@ -1476,6 +1570,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0153',
     title: 'Глянцевая шайба с фасками',
     price: 'от 59 500 ₽',
     material: 'Металл на выбор',
@@ -1497,6 +1592,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0154',
     title: 'Прямая шайба "Зимний лёд"',
     price: 'от 62 500 ₽ .',
     material: 'Металл на выбор',
@@ -1518,6 +1614,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0155',
     title: 'Полусфера матовая с фактурой "Грани"',
     price: 'от 60 000 ₽',
     material: 'Металл на выбор',
@@ -1539,6 +1636,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0156',
     title: 'Прямая шайба с лунной фактурой',
     price: 'от 59 500 ₽',
     material: 'Металл на выбор',
@@ -1560,6 +1658,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0157',
     title: 'Глянцевая шайба с романтичной пропилом',
     price: 'от 59 500 ₽',
     material: 'Металл на выбор',
@@ -1581,6 +1680,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0158',
     title: 'Прямая шайба с "Икс" узорами',
     price: 'от 59 500 ₽',
     material: 'Металл на выбор',
@@ -1602,6 +1702,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0159',
     title: 'Прямая шайба с фаткурой "Лёд"',
     price: 'от 62 000 ₽',
     material: 'Металл на выбор',
@@ -1623,6 +1724,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0160',
     title: 'Прямая шайба с "Икс" узорами',
     price: 'от 59 500 ₽',
     material: 'Металл на выбор',
@@ -1644,6 +1746,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0161',
     title: 'Прямая глянцевая шайба с бриллиантовой дорожкой в край',
     price: 'от 79 000 ₽',
     material: 'Металл на выбор',
@@ -1665,6 +1768,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0162',
     title: 'Комбинированная глянцевая шайба с золотой вставкой',
     price: 'от 72 500 ₽',
     material: 'Металл на выбор',
@@ -1686,6 +1790,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0163',
     title: 'Прямая шайба "Фантазия"',
     price: 'от 75 000 ₽',
     material: 'Металл на выбор',
@@ -1707,6 +1812,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0164',
     title: 'Прямая шайба "Фантазия" с бриллиантовой россыпью',
     price: 'от 89 000 ₽',
     material: 'Металл на выбор',
@@ -1728,6 +1834,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0165',
     title: 'Глянцевая шайба "Грани"',
     price: 'от 59 000 ₽',
     material: 'Металл на выбор',
@@ -1749,6 +1856,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0166',
     title: 'Глянцевая шайба с фактурой "Грани" и бриллиантами',
     price: 'от 68 000 ₽',
     material: 'Металл на выбор',
@@ -1770,6 +1878,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0167',
     title: 'Глянцевая шайба "Горы"',
     price: 'от 59 500 ₽',
     material: 'Металл на выбор',
@@ -1791,6 +1900,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0168',
     title: 'Лунная глянцевая шайба с бриллиантом',
     price: 'от 69 500 ₽',
     material: 'Металл на выбор',
@@ -1812,6 +1922,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0169',
     title: 'Глянцевая шайба с фактурой "Волна"',
     price: 'от 59 500 ₽',
     material: 'Металл на выбор',
@@ -1833,6 +1944,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0170',
     title: 'Матовая шайба с фактурой "Волна"',
     price: 'от 62 500 ₽',
     material: 'Металл на выбор',
@@ -1854,6 +1966,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0171',
     title: 'Матовая прямая шайба с бриллиантовой вставкой',
     price: 'от 68 500 ₽',
     material: 'Металл на выбор',
@@ -1875,6 +1988,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0172',
     title: 'Глянцевая прямая шайба с бриллиантовой вставкой',
     price: 'от 68 500 ₽',
     material: 'Металл на выбор',
@@ -1896,6 +2010,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0173',
     title: 'Глянвая шаба "Бесконечность"',
     price: 'от 59 500 ₽',
     material: 'Металл на выбор',
@@ -1917,6 +2032,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0174',
     title: 'Глянцевая шайба с россыпью бриллиантов',
     price: 'от 187 500₽',
     material: 'Металл на выбор',
@@ -1939,6 +2055,7 @@ const catalogItems = [
   },
 
   {
+    sku: 'RA0175',
     title: 'Изгибы глянцевые белые',
     price: 'от 60 000 ₽',
     material: 'Металл на выбор',
@@ -1960,6 +2077,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0176',
     title: 'Изгибы глянцевые жёлтые',
     price: 'от 60 000 ₽',
     material: 'Металл на выбор',
@@ -1981,6 +2099,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0177',
     title: 'Шайба «Перламутр»',
     price: 'от 60 000 ₽',
     material: 'Металл на выбор',
@@ -2002,6 +2121,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0178',
     title: 'Шайба «Перламутр» с чёрной эмалью',
     price: 'от 70 000 ₽',
     material: 'Металл на выбор',
@@ -2023,6 +2143,7 @@ const catalogItems = [
     }
   },
   {
+    sku: 'RA0179',
     title: 'Полусферы «Тринити»',
     price: 'от 85 000 ₽',
     material: 'Металл на выбор',
@@ -2043,7 +2164,1042 @@ const catalogItems = [
       ]
     }
   },
+  // === Помолвочные кольца (коллекция 02) ===
+  {
+    sku: 'RA0201',
+    title: 'Бриллиант «Радиант» с дорожкой',
+    price: null,
+    material: 'Белое золото',
+    images: ['/pomolvochnye/01.1.webp', '/pomolvochnye/01.2.webp', '/pomolvochnye/01.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллиант огранки «Радиант» 0,6 ct и бриллиантовая дорожка круглой огранки в 1/2 окружности. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Белое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '3,5 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0202',
+    title: 'Бриллиант «Эмеральд» в платине',
+    price: null,
+    material: 'Платина',
+    images: ['/pomolvochnye/02.1.webp', '/pomolvochnye/02.2.webp', '/pomolvochnye/02.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллиант огранки «Эмеральд» 0,7 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Платина' },
+        { label: 'Проба', value: '950' },
+        { label: 'Масса изделия', value: '6 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0203',
+    title: 'Бриллиант «Радиант» 1,5 ct',
+    price: null,
+    material: 'Жёлтое золото',
+    images: ['/pomolvochnye/03.1.webp', '/pomolvochnye/03.2.webp', '/pomolvochnye/03.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллиант огранки «Радиант» 1,5 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Жёлтое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '3,5 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0204',
+    title: 'Бриллиант «Круг» в платине',
+    price: null,
+    material: 'Платина',
+    images: ['/pomolvochnye/04.1.webp', '/pomolvochnye/04.2.webp', '/pomolvochnye/04.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллиант круглой огранки 0,7 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Платина' },
+        { label: 'Проба', value: '950' },
+        { label: 'Масса изделия', value: '5 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0205',
+    title: 'Бриллиант «Круг» в жёлтом золоте',
+    price: null,
+    material: 'Жёлтое золото',
+    images: ['/pomolvochnye/05.1.webp', '/pomolvochnye/05.2.webp', '/pomolvochnye/05.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллиант огранки «Круг» 0,3 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Жёлтое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '3,7 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0206',
+    title: 'Бриллианты «Круг» и «Груша»',
+    price: null,
+    material: 'Белое золото',
+    images: ['/pomolvochnye/06.1.webp', '/pomolvochnye/06.2.webp', '/pomolvochnye/06.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллианты круглой огранки и огранки «Груша» 1,5 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Белое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '3,7 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0207',
+    title: 'Бриллиант «Круг» 0,7 ct',
+    price: null,
+    material: 'Белое золото',
+    images: ['/pomolvochnye/07.1.webp', '/pomolvochnye/07.2.webp', '/pomolvochnye/07.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллиант круглой огранки 0,7 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Белое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '3 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0208',
+    title: 'Жёлтый бриллиант «Груша» с белыми бриллиантами',
+    price: null,
+    material: 'Платина и жёлтое золото',
+    images: ['/pomolvochnye/08.1.webp', '/pomolvochnye/08.2.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Жёлтый бриллиант грушевидной огранки и белые бриллианты огранки «Груша» 3,5 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Платина и жёлтое золото' },
+        { label: 'Проба', value: 'Платина 950 / Золото 585 / 750' },
+        { label: 'Масса изделия', value: '5,3 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0209',
+    title: 'Бриллиант «Круг» в розовом золоте',
+    price: null,
+    material: 'Розовое золото',
+    images: ['/pomolvochnye/09.1.webp', '/pomolvochnye/09.2.webp', '/pomolvochnye/09.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллиант круглой огранки 0,6 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Розовое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '3 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0210',
+    title: 'Бриллиант «Круг» в розовом золоте',
+    price: null,
+    material: 'Розовое золото',
+    images: ['/pomolvochnye/10.1.webp', '/pomolvochnye/10.2.webp', '/pomolvochnye/10.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллиант круглой огранки 0,6 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Розовое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '3 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0211',
+    title: 'Бриллиант «Груша» с россыпью 4 ct',
+    price: null,
+    material: 'Белое золото',
+    images: ['/pomolvochnye/11.1.webp', '/pomolvochnye/11.2.webp', '/pomolvochnye/11.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Грушевидный бриллиант и россыпь круглых бриллиантов 4 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Белое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '5,2 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0212',
+    title: 'Бриллиант «Маркиз» с овалами',
+    price: null,
+    material: 'Белое золото',
+    images: ['/pomolvochnye/12.1.webp', '/pomolvochnye/12.2.webp', '/pomolvochnye/12.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллиант огранки «Маркиз» и бриллианты овальной огранки 3,2 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Белое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '4 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0213',
+    title: 'Бриллиант «Эмеральд» 2 ct',
+    price: null,
+    material: 'Жёлтое золото',
+    images: ['/pomolvochnye/13.1.webp', '/pomolvochnye/13.2.webp', '/pomolvochnye/13.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллиант огранки «Эмеральд» 2 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Жёлтое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '3 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0214',
+    title: 'Бриллиант «Груша» с россыпью 4,3 ct',
+    price: null,
+    material: 'Белое золото',
+    images: ['/pomolvochnye/14.1.webp', '/pomolvochnye/14.2.webp', '/pomolvochnye/14.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллиант огранки «Груша» и бриллианты круглой огранки 4,3 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Белое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '5,5 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0215',
+    title: 'Бриллианты «Круг» и «Груша» 10 ct',
+    price: null,
+    material: 'Белое золото',
+    images: ['/pomolvochnye/15.1.webp', '/pomolvochnye/15.2.webp', '/pomolvochnye/15.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллианты круглой огранки и огранки «Груша» 10 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Белое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '6 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0216',
+    title: 'Бриллианты «Овал» и «Круг»',
+    price: null,
+    material: 'Белое золото',
+    images: ['/pomolvochnye/16.1.webp', '/pomolvochnye/16.2.webp', '/pomolvochnye/16.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллианты овальной огранки и огранки «Круг» 3,5 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Белое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '3,4 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0217',
+    title: 'Изумруд с бриллиантами',
+    price: null,
+    material: 'Жёлтое золото',
+    images: ['/pomolvochnye/17.1.webp', '/pomolvochnye/17.2.webp', '/pomolvochnye/17.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Изумруд круглой огранки и белые бриллианты огранки «Круг» 1,5 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Жёлтое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '4 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0218',
+    title: 'Жёлтый бриллиант «Эмеральд» с бриллиантами',
+    price: null,
+    material: 'Жёлтое золото',
+    images: ['/pomolvochnye/18.1.webp', '/pomolvochnye/18.2.webp', '/pomolvochnye/18.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Жёлтый бриллиант огранки «Эмеральд» и белые бриллианты круглой огранки 1,4 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Жёлтое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '3,4 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0219',
+    title: 'Голубой бриллиант «Груша» с бриллиантами',
+    price: null,
+    material: 'Белое золото',
+    images: ['/pomolvochnye/19.1.webp', '/pomolvochnye/19.2.webp', '/pomolvochnye/19.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Голубой бриллиант огранки «Груша», белый бриллиант огранки «Груша» и белые бриллианты круглой огранки 5 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Белое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '7,4 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0220',
+    title: 'Бриллиант «Маркиз» в жёлтом золоте',
+    price: null,
+    material: 'Жёлтое золото',
+    images: ['/pomolvochnye/20.1.webp', '/pomolvochnye/20.2.webp', '/pomolvochnye/20.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллиант огранки «Маркиз» 1 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Жёлтое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '3,4 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0221',
+    title: 'Бриллиант «Маркиз» 2 ct с россыпью',
+    price: null,
+    material: 'Белое золото',
+    images: ['/pomolvochnye/21.1.webp', '/pomolvochnye/21.2.webp', '/pomolvochnye/21.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллиант огранки «Маркиз» 2 ct и белые бриллианты круглой огранки. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Белое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '4,2 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0222',
+    title: 'Бриллиант «Овал» 2 ct',
+    price: null,
+    material: 'Жёлтое золото',
+    images: ['/pomolvochnye/22.1.webp', '/pomolvochnye/22.2.webp', '/pomolvochnye/22.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллиант овальной огранки 2 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Жёлтое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '3,4 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0223',
+    title: 'Бриллиант «Круг» 0,7 ct',
+    price: null,
+    material: 'Белое золото',
+    images: ['/pomolvochnye/23.1.webp', '/pomolvochnye/23.2.webp', '/pomolvochnye/23.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллиант круглой огранки 0,7 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Белое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '2,7 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0224',
+    title: 'Бриллиант «Груша» с россыпью 5 ct',
+    price: null,
+    material: 'Белое золото',
+    images: ['/pomolvochnye/24.1.webp', '/pomolvochnye/24.2.webp', '/pomolvochnye/24.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллиант грушевидной огранки и белые бриллианты огранки «Груша» 5 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Белое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '5,3 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0225',
+    title: 'Розовый бриллиант «Груша» с россыпью',
+    price: null,
+    material: 'Белое золото',
+    images: ['/pomolvochnye/25.1.webp', '/pomolvochnye/25.2.webp', '/pomolvochnye/25.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Розовый бриллиант грушевидной огранки и белые бриллианты огранки «Груша» 5 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Белое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '5,3 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0226',
+    title: 'Бриллианты «Груша» и «Эмеральд»',
+    price: null,
+    material: 'Белое золото',
+    images: ['/pomolvochnye/26.1.webp', '/pomolvochnye/26.2.webp', '/pomolvochnye/26.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Грушевидный бриллиант и бриллиант огранки «Эмеральд» 5 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Белое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '7,5 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0227',
+    title: 'Бриллианты «Груша» в жёлтом золоте',
+    price: null,
+    material: 'Жёлтое золото',
+    images: ['/pomolvochnye/27.1.webp', '/pomolvochnye/27.2.webp', '/pomolvochnye/27.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллианты грушевидной огранки 3,4 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Жёлтое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '5,3 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0228',
+    title: 'Бриллианты «Груша» в платине',
+    price: null,
+    material: 'Платина',
+    images: ['/pomolvochnye/28.1.webp', '/pomolvochnye/28.2.webp', '/pomolvochnye/28.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллианты грушевидной огранки 3,4 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Платина' },
+        { label: 'Проба', value: '950' },
+        { label: 'Масса изделия', value: '7 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0229',
+    title: 'Бриллианты «Овал» и «Круг» 5 ct',
+    price: null,
+    material: 'Белое золото',
+    images: ['/pomolvochnye/29.1.webp', '/pomolvochnye/29.2.webp', '/pomolvochnye/29.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллиант овальной огранки и огранки «Круг» 5 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Белое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '3,4 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0230',
+    title: 'Жёлтый бриллиант «Овал» с россыпью',
+    price: null,
+    material: 'Белое золото',
+    images: ['/pomolvochnye/30.1.webp', '/pomolvochnye/30.2.webp', '/pomolvochnye/30.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Жёлтый бриллиант овальной огранки и белые бриллианты огранки «Круг» 5 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Белое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '3,4 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0231',
+    title: 'Бриллиант «Сердце» с бриллиантами',
+    price: null,
+    material: 'Белое золото',
+    images: ['/pomolvochnye/31.1.webp', '/pomolvochnye/31.2.webp', '/pomolvochnye/31.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллиант огранки «Сердце» и бриллианты круглой огранки 2,8 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Белое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '3,8 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0232',
+    title: 'Бриллиантовая россыпь 0,9 ct',
+    price: null,
+    material: 'Жёлтое золото',
+    images: ['/pomolvochnye/32.1.webp', '/pomolvochnye/32.2.webp', '/pomolvochnye/32.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллианты круглой огранки 0,9 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Жёлтое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '2,8 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0233',
+    title: 'Бриллиантовая россыпь 1,7 ct',
+    price: null,
+    material: 'Белое золото',
+    images: ['/pomolvochnye/33.1.webp', '/pomolvochnye/33.2.webp', '/pomolvochnye/33.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллианты круглой огранки 1,7 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Белое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '2,6 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0234',
+    title: 'Бриллиантовая россыпь 7 ct',
+    price: null,
+    material: 'Белое золото',
+    images: ['/pomolvochnye/34.1.webp', '/pomolvochnye/34.2.webp', '/pomolvochnye/34.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллианты круглой огранки 7 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Белое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '6,2 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0235',
+    title: 'Бриллиант «Радиант» с россыпью 2,3 ct',
+    price: null,
+    material: 'Белое золото',
+    images: ['/pomolvochnye/35.1.webp', '/pomolvochnye/35.2.webp', '/pomolvochnye/35.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллиант огранки «Радиант» и бриллиантовая россыпь круглой огранки в 1/2 окружности 2,3 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Белое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '3,5 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0236',
+    title: 'Бриллиант «Маркиз» 2 ct',
+    price: null,
+    material: 'Белое золото',
+    images: ['/pomolvochnye/36.1.webp', '/pomolvochnye/36.2.webp', '/pomolvochnye/36.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллиант огранки «Маркиз» 2 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Белое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '2,7 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0237',
+    title: 'Голубой бриллиант «Овал» с россыпью',
+    price: null,
+    material: 'Белое золото',
+    images: ['/pomolvochnye/37.1.webp', '/pomolvochnye/37.2.webp', '/pomolvochnye/37.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Голубой бриллиант овальной огранки и белая россыпь бриллиантов огранки «Круг» 2,5 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Белое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '3,5 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0238',
+    title: 'Зелёный бриллиант «Овал» с россыпью',
+    price: null,
+    material: 'Белое золото',
+    images: ['/pomolvochnye/38.1.webp', '/pomolvochnye/38.2.webp', '/pomolvochnye/38.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Зелёный бриллиант овальной огранки и белая россыпь бриллиантов огранки «Круг» 2,5 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Белое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '3,5 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0239',
+    title: 'Изумруд «Эмеральд» с россыпью',
+    price: null,
+    material: 'Жёлтое золото',
+    images: ['/pomolvochnye/39.1.webp', '/pomolvochnye/39.2.webp', '/pomolvochnye/39.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Изумруд огранки «Эмеральд» и белая россыпь бриллиантов огранки «Круг» 1,5 ct. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Жёлтое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '3,5 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0240',
+    title: 'Бриллиант «Груша» 10 ct в платине',
+    price: null,
+    material: 'Платина',
+    images: ['/pomolvochnye/40.1.webp', '/pomolvochnye/40.2.webp', '/pomolvochnye/40.3.webp', '/pomolvochnye/40.4.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллиант огранки «Груша» 10 ct и бриллиантовая россыпь круглой огранки. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Платина' },
+        { label: 'Проба', value: '950' },
+        { label: 'Масса изделия', value: '9 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0241',
+    title: 'Бриллиант «Груша» 10 ct в жёлтом золоте',
+    price: null,
+    material: 'Жёлтое золото',
+    images: ['/pomolvochnye/41.1.webp', '/pomolvochnye/41.2.webp', '/pomolvochnye/41.3.webp', '/pomolvochnye/41.4.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллиант огранки «Груша» 10 ct и бриллиантовая россыпь круглой огранки. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Жёлтое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '6 г' }
+      ]
+    }
+  },
+  {
+    sku: 'RA0242',
+    title: 'Бриллиант «Круг» с россыпью',
+    price: null,
+    material: 'Белое золото',
+    images: ['/pomolvochnye/42.1.webp', '/pomolvochnye/42.2.webp', '/pomolvochnye/42.3.webp'],
+    bestseller: false,
+    categories: ['Помолвочные кольца'],
+    type: 'engagement',
+    specs: {
+      style: 'Бриллиант круглой огранки 0,7 ct и бриллиантовая россыпь круглой огранки. *Происхождение бриллиантов на выбор.',
+      engagement: [
+        { label: 'Металл', value: 'Белое золото' },
+        { label: 'Проба', value: '585 / 750' },
+        { label: 'Масса изделия', value: '2,7 г' }
+      ]
+    }
+  },
+
+  // === Diamonds ===
+  {
+    hidden: true,
+    title: 'Круглый',
+    price: 'от 25 000 ₽',
+    material: 'GIA',
+    images: ['/diamonds/placeholder-stone.webp', '/diamonds/placeholder-cert.webp'],
+    bestseller: false,
+    categories: ['Бриллианты'],
+    type: 'diamond',
+    specs: {
+      style: 'Классический бриллиант круглой огранки с сертификатом GIA. Универсальная форма для помолвочного кольца или подвески.',
+      gia: [
+        { label: 'Масса, карат', value: '0.15 – 6.01' },
+        { label: 'Цвет - Color GIA', value: 'S-T – D' },
+        { label: 'Чистота - Clarity GIA', value: 'I2 – VVS1' },
+        { label: 'Размеры (мм)', value: '3.45 – 11.68' },
+        { label: 'Форма огранки', value: 'Круглый' },
+        { label: 'Сертификат', value: 'GIA' }
+      ]
+    }
+  },
+  {
+    hidden: true,
+    title: 'Принцесса',
+    price: 'от 25 000 ₽',
+    material: 'GIA',
+    images: ['/diamonds/placeholder-stone.webp', '/diamonds/placeholder-cert.webp'],
+    bestseller: false,
+    categories: ['Бриллианты'],
+    type: 'diamond',
+    specs: {
+      style: 'Бриллиант огранки «Принцесса» — квадратная форма с острыми углами и современным блеском.',
+      gia: [
+        { label: 'Масса, карат', value: '0.21 – 3.11' },
+        { label: 'Цвет - Color GIA', value: 'S-T – D' },
+        { label: 'Чистота - Clarity GIA', value: 'VS2 – VVS2' },
+        { label: 'Размеры (мм)', value: '3.28 – 7.99' },
+        { label: 'Форма огранки', value: 'Принцесса' },
+        { label: 'Сертификат', value: 'GIA' }
+      ]
+    }
+  },
+  {
+    hidden: true,
+    title: 'Овал',
+    price: 'от 25 000 ₽',
+    material: 'GIA',
+    images: ['/diamonds/placeholder-stone.webp', '/diamonds/placeholder-cert.webp'],
+    bestseller: false,
+    categories: ['Бриллианты'],
+    type: 'diamond',
+    specs: {
+      style: 'Бриллиант овальной огранки визуально выглядит крупнее благодаря удлинённой форме и большой площадке.',
+      gia: [
+        { label: 'Масса, карат', value: '0.19 – 4.02' },
+        { label: 'Цвет - Color GIA', value: 'W-X – E' },
+        { label: 'Чистота - Clarity GIA', value: 'I2 – VVS2' },
+        { label: 'Размеры (мм)', value: '3.28 – 10.83' },
+        { label: 'Форма огранки', value: 'Овал' },
+        { label: 'Сертификат', value: 'GIA' }
+      ]
+    }
+  },
+  {
+    hidden: true,
+    title: 'Кушон',
+    price: 'от 25 000 ₽',
+    material: 'GIA',
+    images: ['/diamonds/placeholder-stone.webp', '/diamonds/placeholder-cert.webp'],
+    bestseller: false,
+    categories: ['Бриллианты'],
+    type: 'diamond',
+    specs: {
+      style: 'Бриллиант огранки «Кушон» с мягким квадратным силуэтом, закруглёнными углами и крупными гранями.',
+      gia: [
+        { label: 'Масса, карат', value: '0.31 – 5.01' },
+        { label: 'Цвет - Color GIA', value: 'Y-Z – E' },
+        { label: 'Чистота - Clarity GIA', value: 'SI1 – VVS1' },
+        { label: 'Размеры (мм)', value: '3.44 – 9.06' },
+        { label: 'Форма огранки', value: 'Кушон' },
+        { label: 'Сертификат', value: 'GIA' }
+      ]
+    }
+  },
+  {
+    hidden: true,
+    title: 'Груша',
+    price: 'от 25 000 ₽',
+    material: 'GIA',
+    images: ['/diamonds/placeholder-stone.webp', '/diamonds/placeholder-cert.webp'],
+    bestseller: false,
+    categories: ['Бриллианты'],
+    type: 'diamond',
+    specs: {
+      style: 'Бриллиант грушевидной огранки с изящным вытянутым силуэтом, который удлиняет пальцы и привлекает внимание.',
+      gia: [
+        { label: 'Масса, карат', value: '0.23 – 5.02' },
+        { label: 'Цвет - Color GIA', value: 'L – D' },
+        { label: 'Чистота - Clarity GIA', value: 'SI2 – IF' },
+        { label: 'Размеры (мм)', value: '3.27 – 14.11' },
+        { label: 'Форма огранки', value: 'Груша' },
+        { label: 'Сертификат', value: 'GIA' }
+      ]
+    }
+  },
+  {
+    hidden: true,
+    title: 'Ашер',
+    price: 'от 25 000 ₽',
+    material: 'GIA',
+    images: ['/diamonds/placeholder-stone.webp', '/diamonds/placeholder-cert.webp'],
+    bestseller: false,
+    categories: ['Бриллианты'],
+    type: 'diamond',
+    specs: {
+      style: 'Бриллиант огранки «Ашер» с квадратным ступенчатым рисунком и глубокой игрой света в винтажном стиле.',
+      gia: [
+        { label: 'Масса, карат', value: '3.00 – 5.00' },
+        { label: 'Цвет - Color GIA', value: 'F – H' },
+        { label: 'Чистота - Clarity GIA', value: 'VS2 – VVS1' },
+        { label: 'Размеры (мм)', value: '8.00 – 8.80' },
+        { label: 'Форма огранки', value: 'Ашер' },
+        { label: 'Сертификат', value: 'GIA' }
+      ]
+    }
+  },
+  {
+    hidden: true,
+    title: 'Маркиз',
+    price: 'от 25 000 ₽',
+    material: 'GIA',
+    images: ['/diamonds/placeholder-stone.webp', '/diamonds/placeholder-cert.webp'],
+    bestseller: false,
+    categories: ['Бриллианты'],
+    type: 'diamond',
+    specs: {
+      style: 'Бриллиант огранки «Маркиз» с вытянутой лодочкообразной формой и большой видимой площадью при данной массе.',
+      gia: [
+        { label: 'Масса, карат', value: '0.50 – 1.00' },
+        { label: 'Цвет - Color GIA', value: 'D – F' },
+        { label: 'Чистота - Clarity GIA', value: 'VVS2 – VVS1' },
+        { label: 'Размеры (мм)', value: '4.50 – 9.50' },
+        { label: 'Форма огранки', value: 'Маркиз' },
+        { label: 'Сертификат', value: 'GIA' }
+      ]
+    }
+  },
+  {
+    hidden: true,
+    title: 'Сердце',
+    price: 'от 25 000 ₽',
+    material: 'GIA',
+    images: ['/diamonds/placeholder-stone.webp', '/diamonds/placeholder-cert.webp'],
+    bestseller: false,
+    categories: ['Бриллианты'],
+    type: 'diamond',
+    specs: {
+      style: 'Романтичный бриллиант в форме сердца — выразительный выбор для помолвочного кольца или особенного подарка.',
+      gia: [
+        { label: 'Масса, карат', value: '0.51 – 1.01' },
+        { label: 'Цвет - Color GIA', value: 'F – E' },
+        { label: 'Чистота - Clarity GIA', value: 'VS2 – VS1' },
+        { label: 'Размеры (мм)', value: '4.63 – 6.92' },
+        { label: 'Форма огранки', value: 'Сердце' },
+        { label: 'Сертификат', value: 'GIA' }
+      ]
+    }
+  },
+  {
+    hidden: true,
+    title: 'Радиант',
+    price: 'от 25 000 ₽',
+    material: 'GIA',
+    images: ['/diamonds/placeholder-stone.webp', '/diamonds/placeholder-cert.webp'],
+    bestseller: false,
+    categories: ['Бриллианты'],
+    type: 'diamond',
+    specs: {
+      style: 'Бриллиант огранки «Радиант» сочетает квадратный силуэт с яркой ограновкой круга, создавая насыщенный блеск.',
+      gia: [
+        { label: 'Масса, карат', value: '0.29 – 1.50' },
+        { label: 'Цвет - Color GIA', value: 'G – E' },
+        { label: 'Чистота - Clarity GIA', value: 'SI2 – VVS2' },
+        { label: 'Размеры (мм)', value: '3.32 – 6.89' },
+        { label: 'Форма огранки', value: 'Радиант' },
+        { label: 'Сертификат', value: 'GIA' }
+      ]
+    }
+  },
+  {
+    hidden: true,
+    title: 'Багет',
+    price: 'от 25 000 ₽',
+    material: 'GIA',
+    images: ['/diamonds/placeholder-stone.webp', '/diamonds/placeholder-cert.webp'],
+    bestseller: false,
+    categories: ['Бриллианты'],
+    type: 'diamond',
+    specs: {
+      style: 'Бриллиант огранки «Багет» — вытянутая прямоугольная форма с чистыми линиями, идеальная для дорожек и акцентов.',
+      gia: [
+        { label: 'Масса, карат', value: '0.71 – 0.83' },
+        { label: 'Цвет - Color GIA', value: 'D – D' },
+        { label: 'Чистота - Clarity GIA', value: 'VVS1 – IF' },
+        { label: 'Размеры (мм)', value: '4.76 – 7.54' },
+        { label: 'Форма огранки', value: 'Багет' },
+        { label: 'Сертификат', value: 'GIA' }
+      ]
+    }
+  },
+  {
+    hidden: true,
+    title: 'Триллиант',
+    price: 'от 25 000 ₽',
+    material: 'GIA',
+    images: ['/diamonds/placeholder-stone.webp', '/diamonds/placeholder-cert.webp'],
+    bestseller: false,
+    categories: ['Бриллианты'],
+    type: 'diamond',
+    specs: {
+      style: 'Бриллиант треугольной огранки «Триллиант» — геометричная форма с острыми углами и выразительным симметричным блеском.',
+      gia: [
+        { label: 'Масса, карат', value: '0.32 – 0.75' },
+        { label: 'Цвет - Color GIA', value: 'G – E' },
+        { label: 'Чистота - Clarity GIA', value: 'SI1 – VVS1' },
+        { label: 'Размеры (мм)', value: '4.62 – 6.75' },
+        { label: 'Форма огранки', value: 'Триллиант' },
+        { label: 'Сертификат', value: 'GIA' }
+      ]
+    }
+  },
+  {
+    hidden: true,
+    title: 'Изумруд',
+    price: 'от 25 000 ₽',
+    material: 'GIA',
+    images: ['/diamonds/placeholder-stone.webp', '/diamonds/placeholder-cert.webp'],
+    bestseller: false,
+    categories: ['Бриллианты'],
+    type: 'diamond',
+    specs: {
+      style: 'Бриллиант изумрудной огранки с прямоугольным ступенчатым силуэтом и зеркальным блеском граней.',
+      gia: [
+        { label: 'Масса, карат', value: '0.5' },
+        { label: 'Цвет - Color GIA', value: '5 - H' },
+        { label: 'Чистота - Clarity GIA', value: '7а - SI2' },
+        { label: 'Размеры (мм)', value: '4.38×4.05×3.17' },
+        { label: 'Форма огранки', value: 'Изумруд' },
+        { label: 'Сертификат', value: 'GIA' }
+      ]
+    }
+  },
 ]
+
+// === Ссылка с артикулом: /catalog/RA0101 открывает карточку ===
+watch(() => route.params.sku, (sku) => {
+  if (sku) {
+    const item = catalogItems.find(i => i.sku === String(sku))
+    if (item) openModal(item, true)
+  } else if (selectedProduct.value) {
+    selectedProduct.value = null
+    currentImage.value = 0
+    document.body.style.overflow = ''
+  }
+}, { immediate: true })
+
+const collectionLabel = (item) => {
+  if (item.type === 'diamond') return 'Сертифицированный камень'
+  if (item.type === 'engagement') return 'Помолвочное кольцо'
+  return 'Работа с мастер-класса'
+}
+
+const priceNote = (item) => {
+  if (item.type === 'diamond') return 'за камень · GIA'
+  if (item.type === 'engagement') return 'за кольцо'
+  return 'за пару · с материалами'
+}
 </script>
 
 <style scoped>
@@ -2993,6 +4149,34 @@ const catalogItems = [
   transform: translateX(3px);
 }
 
+/* === Engagement: two CTAs + "price on request" === */
+.modal-cta-group {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.modal-cta.secondary {
+  background: transparent;
+  border-color: rgba(222, 186, 78, 0.55);
+  color: var(--color-gold-light);
+}
+
+.modal-cta.secondary::before {
+  display: none;
+}
+
+.modal-cta.secondary:hover {
+  background: rgba(222, 186, 78, 0.1);
+  border-color: var(--color-gold);
+  color: var(--color-gold-light);
+}
+
+.modal-price-request {
+  font-size: 1.6rem;
+}
+
 /* ===========================================
    Specs block (Она / Он, таблица, металлы)
    =========================================== */
@@ -3177,6 +4361,16 @@ const catalogItems = [
     flex-direction: column;
     align-items: stretch;
     gap: 1.25rem;
+  }
+
+  .modal-footer .modal-cta-group {
+    width: 100%;
+    flex-wrap: nowrap;
+  }
+
+  .modal-footer .modal-cta-group .modal-cta {
+    flex: 1;
+    justify-content: center;
   }
 
   .modal-cta {
