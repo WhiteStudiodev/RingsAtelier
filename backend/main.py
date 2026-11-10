@@ -53,7 +53,9 @@ async def create_lead(lead_data: LeadCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(lead)
 
-    await send_lead_notification(lead)
-    await send_lead_email(lead)
+    # Заявка уже сохранена — отвечаем клиенту сразу,
+    # а уведомления отправляем в фоне, не задерживая ответ.
+    asyncio.create_task(send_lead_notification(lead))
+    asyncio.create_task(send_lead_email(lead))
 
     return lead
