@@ -173,7 +173,10 @@
 
             <div class="modal-info">
               <div class="modal-meta">
-                <span class="modal-material">{{ selectedProduct.material }}</span>
+                <div class="modal-meta-left">
+                  <span class="modal-material">{{ selectedProduct.material }}</span>
+                  <span v-if="selectedProduct.sku" class="modal-sku">арт. {{ selectedProduct.sku }}</span>
+                </div>
                 <span class="modal-collection">{{ collectionLabel(selectedProduct) }}</span>
               </div>
 
@@ -2851,7 +2854,7 @@ const catalogItems = [
   },
   {
     sku: 'RA0239',
-    title: 'Изумруд «Эмеральд» с россыпью',
+    title: 'Изумруд «Эмеральд»',
     price: null,
     material: 'Жёлтое золото',
     images: ['/pomolvochnye/39.1.webp', '/pomolvochnye/39.2.webp', '/pomolvochnye/39.3.webp'],
@@ -2859,7 +2862,7 @@ const catalogItems = [
     categories: ['Помолвочные кольца'],
     type: 'engagement',
     specs: {
-      style: 'Изумруд огранки «Эмеральд» и белая россыпь бриллиантов огранки «Круг» 1,5 ct. *Происхождение бриллиантов на выбор.',
+      style: 'Изумруд огранки «Эмеральд». *Происхождение бриллиантов на выбор.',
       engagement: [
         { label: 'Металл', value: 'Жёлтое золото' },
         { label: 'Проба', value: '585 / 750' },
@@ -4008,10 +4011,17 @@ const priceNote = (item) => {
 
 .modal-meta {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
   margin-bottom: 1.5rem;
+}
+
+.modal-meta-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
 }
 
 .modal-material {
@@ -4020,6 +4030,13 @@ const priceNote = (item) => {
   letter-spacing: 0.25em;
   text-transform: uppercase;
   color: var(--color-gold);
+}
+
+.modal-sku {
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  color: var(--color-text-muted);
 }
 
 .modal-collection {
