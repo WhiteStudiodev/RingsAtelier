@@ -8,6 +8,8 @@ services:
     environment:
       - BOT_TOKEN=${BOT_TOKEN:-}
       - CHAT_ID=${CHAT_ID:-}
+      - BACKUP_CHAT_ID=${BACKUP_CHAT_ID:-}
+      - BACKUP_TIME_UTC=${BACKUP_TIME_UTC:-05:00}
       - DATABASE_URL=sqlite:///./data/leads.db
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost,https://${DOMAIN:-localhost}}
       - TELEGRAM_API_URL=${TELEGRAM_API_URL:-https://api.telegram.org/}

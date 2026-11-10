@@ -65,6 +65,9 @@ async def create_backup() -> Path | None:
 async def send_backup_notification(backup_path: Path | None, success: bool) -> None:
     """Send the daily backup report to the backup Telegram chat."""
     if not settings.bot_token or not settings.backup_chat_id:
+        logger.warning(
+            "Backup notification skipped: BOT_TOKEN or BACKUP_CHAT_ID is not configured"
+        )
         return
 
     now_str = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
