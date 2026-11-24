@@ -55,18 +55,13 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 
 const clientPhotos = [
-  '/clients/DSC05961.webp',
-  '/clients/DSC06119.webp',
-  '/clients/DSC06935.webp',
-  '/clients/DSC07096.webp',
-  '/clients/DSC07156.webp',
-  '/clients/DSC07442.webp',
-  '/clients/DSC07626.webp',
-  '/clients/DSC07670.webp',
-  '/clients/IMG_2172.webp',
-  '/clients/IMG_2735.webp',
-  '/clients/IMG_2839.webp',
-  '/clients/IMG_2924.webp'
+  '/clients/IMG_5417.webp',
+  '/clients/IMG_5418.webp',
+  '/clients/IMG_5420.webp',
+  '/clients/IMG_5422.webp',
+  '/clients/IMG_5423.webp',
+  '/clients/IMG_5416.webp',
+  '/clients/IMG_5421.webp'
 ]
 
 const realItems = clientPhotos.map((src, i) => ({ id: i, src }))
