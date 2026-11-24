@@ -10,6 +10,7 @@ services:
       - CHAT_ID=${CHAT_ID:-}
       - BACKUP_CHAT_ID=${BACKUP_CHAT_ID:-}
       - BACKUP_TIME_UTC=${BACKUP_TIME_UTC:-05:00}
+      - SITE_CHECK_URL=${SITE_CHECK_URL:-https://rings-atelier.ru}
       - DATABASE_URL=sqlite:///./data/leads.db
       - CORS_ORIGINS=${CORS_ORIGINS:-https://${DOMAIN:-localhost}}
       - TELEGRAM_API_URL=${TELEGRAM_API_URL:-https://api.telegram.org/}

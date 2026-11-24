@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     backup_retention_days: int = 7
     backup_dir: str = "./backups"
 
+    # Public site URL for the daily availability check in the status report.
+    site_check_url: str = "https://rings-atelier.ru"
+
     # SMTP settings for email notifications (Yandex: smtp.yandex.ru:465)
     smtp_host: str = "smtp.yandex.ru"
     smtp_port: int = 465

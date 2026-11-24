@@ -1,12 +1,18 @@
 import asyncio
 import shutil
-from datetime import datetime, timedelta, time
+from datetime import datetime, timedelta, time, timezone
 from pathlib import Path
+from time import monotonic
 
+import aiohttp
 from loguru import logger
+from sqlalchemy import func
 
 from config import settings
-from services.telegram import send_telegram_document, send_telegram_message
+from database import Lead, SessionLocal
+from services.telegram import send_telegram_message
+
+MSK = timezone(timedelta(hours=3))
 
 
 def get_db_file_path() -> Path | None:
@@ -62,33 +68,79 @@ async def create_backup() -> Path | None:
         return None
 
 
-async def send_backup_notification(backup_path: Path | None, success: bool) -> None:
-    """Send the daily backup report to the backup Telegram chat."""
+async def check_site() -> tuple[bool, str]:
+    """Check that the public site responds; returns (ok, human-readable detail)."""
+    try:
+        start = monotonic()
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                settings.site_check_url,
+                timeout=aiohttp.ClientTimeout(total=10),
+                allow_redirects=True,
+            ) as response:
+                elapsed = monotonic() - start
+                detail = f"HTTP {response.status}, {elapsed:.1f} с"
+                return response.status == 200, detail
+    except Exception as exc:
+        logger.warning("Site check failed: {}", exc)
+        return False, type(exc).__name__
+
+
+def get_leads_stats() -> tuple[int, int]:
+    """Return (leads in the last 24h, total leads)."""
+    since = datetime.utcnow() - timedelta(hours=24)
+    with SessionLocal() as db:
+        total = db.query(func.count(Lead.id)).scalar() or 0
+        fresh = (
+            db.query(func.count(Lead.id))
+            .filter(Lead.created_at >= since)
+            .scalar()
+            or 0
+        )
+    return fresh, total
+
+
+async def send_daily_report(
+    backup_path: Path | None, site_ok: bool, site_detail: str
+) -> None:
+    """Send the daily status report to the backup Telegram chat."""
     if not settings.bot_token or not settings.backup_chat_id:
         logger.warning(
-            "Backup notification skipped: BOT_TOKEN or BACKUP_CHAT_ID is not configured"
+            "Daily report skipped: BOT_TOKEN or BACKUP_CHAT_ID is not configured"
         )
         return
 
-    now_str = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    backup_ok = backup_path is not None
+    now_str = datetime.now(MSK).strftime("%d.%m.%Y %H:%M МСК")
 
-    if success and backup_path:
-        size_bytes = backup_path.stat().st_size
-        size_text = _humanize_size(size_bytes)
-        caption = (
-            f"<b>✅ Бэкап БД Rings Atelier</b>\n\n"
-            f"Файл: <code>{backup_path.name}</code>\n"
-            f"Размер: {size_text}\n"
-            f"Время: {now_str} UTC"
-        )
-        await send_telegram_document(settings.backup_chat_id, backup_path, caption)
+    header = (
+        "✅ Всё хорошо — сайт работает в штатном режиме"
+        if site_ok and backup_ok
+        else "⚠️ Требует внимания"
+    )
+    lines = [f"<b>{header}</b>", ""]
+
+    if site_ok:
+        lines.append(f"🌐 Сайт: доступен ({site_detail})")
     else:
-        text = (
-            f"<b>❌ Бэкап БД Rings Atelier не удался</b>\n\n"
-            f"Время: {now_str} UTC\n"
-            f"Проверьте логи сервера."
-        )
-        await send_telegram_message(settings.backup_chat_id, text)
+        lines.append(f"🌐 Сайт: НЕ ОТВЕЧАЕТ ({site_detail})")
+
+    if backup_ok:
+        size_text = _humanize_size(backup_path.stat().st_size)
+        lines.append(f"🗂 Бэкап БД: создан ({size_text})")
+    else:
+        lines.append("🗂 Бэкап БД: НЕ СОЗДАН — проверьте логи сервера")
+
+    try:
+        fresh, total = get_leads_stats()
+        lines.append(f"💬 Заявки: +{fresh} за сутки, всего {total}")
+    except Exception:
+        logger.exception("Failed to count leads")
+        lines.append("💬 Заявки: ошибка подсчёта")
+
+    lines.append(f"🕒 {now_str}")
+
+    await send_telegram_message(settings.backup_chat_id, "\n".join(lines))
 
 
 def _humanize_size(size_bytes: int) -> str:
@@ -99,9 +151,10 @@ def _humanize_size(size_bytes: int) -> str:
     return f"{size_bytes / (1024 * 1024):.2f} MB"
 
 
-async def run_backup() -> None:
+async def run_daily_report() -> None:
     backup_path = await create_backup()
-    await send_backup_notification(backup_path, backup_path is not None)
+    site_ok, site_detail = await check_site()
+    await send_daily_report(backup_path, site_ok, site_detail)
 
 
 def _parse_time(time_str: str) -> time:
@@ -118,18 +171,18 @@ def _seconds_until_next_run(target_time: time) -> float:
 
 
 async def backup_scheduler() -> None:
-    """Background task: run DB backup once a day at the configured UTC time."""
+    """Background task: daily DB backup + site status report at the configured UTC time."""
     while True:
         try:
             target_time = _parse_time(settings.backup_time_utc)
             wait = _seconds_until_next_run(target_time)
             logger.info(
-                "Next DB backup scheduled at {} UTC (in {:.0f}s)",
+                "Next daily report scheduled at {} UTC (in {:.0f}s)",
                 target_time,
                 wait,
             )
             await asyncio.sleep(wait)
-            await run_backup()
+            await run_daily_report()
             # Sleep a minute to avoid running twice within the same scheduled minute.
             await asyncio.sleep(60)
         except Exception:
